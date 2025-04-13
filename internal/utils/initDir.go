@@ -26,5 +26,5 @@ func CheckNoteDir() (string, error) {
 
 		fmt.Println("Successfully created directory .toney.")
 	}
-	return dirPath, nil
+	return dirPath + "/", nil
 }
