@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"toney/cmd/edit"
 	"toney/cmd/jrnl"
 
 	"github.com/spf13/cobra"
@@ -10,6 +11,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(jrnl.JrnlCommand)
+	rootCmd.AddCommand(edit.EditCommand)
 
 	// Persistent Flag
 }

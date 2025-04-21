@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"toney/internal/models"
-	"toney/internal/utils"
 
 	"github.com/spf13/cobra"
 
@@ -19,17 +17,9 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "add a task to your journal",
 	Run: func(cmd *cobra.Command, args []string) {
-		dirPath, err := utils.CheckNoteDir()
+		f, err := GetTodayJrnl()
 		if err != nil {
-			return
-		}
-
-		fileName := dirPath + time.Now().UTC().Format("2006_01_02") + ".toney"
-
-		f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-		if err != nil {
-			fmt.Println("ERROR: error opening journal file.")
-			fmt.Printf("err -> %s\n", err.Error())
+			fmt.Println(err.Error())
 			return
 		}
 
