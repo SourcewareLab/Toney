@@ -4,6 +4,5 @@ type Splits int
 
 const (
 	File = iota
-	Vaults
-	Tasks
+	FViewer
 )
