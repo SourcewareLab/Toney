@@ -1,6 +1,7 @@
 package models
 
 import (
+	filepopup "toney/internal/models/filePopup"
 	homemodels "toney/internal/models/homeModels"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,8 +16,8 @@ type HomeModel struct {
 	Viewer       homemodels.Viewer
 }
 
-func NewHome() HomeModel {
-	return HomeModel{
+func NewHome() *HomeModel {
+	return &HomeModel{
 		FocusOn:      homemodels.FViewer,
 		FileExplorer: *homemodels.NewFileExplorer(),
 		Viewer:       homemodels.Viewer{},
@@ -29,6 +30,11 @@ func (m HomeModel) Init() tea.Cmd {
 
 func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case filepopup.PopupMessage:
+		return m, func() tea.Msg {
+			return msg
+		}
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":

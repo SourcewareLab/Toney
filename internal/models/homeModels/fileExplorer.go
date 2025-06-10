@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"toney/internal/enums"
 	filetree "toney/internal/fileTree"
+	filepopup "toney/internal/models/filePopup"
 	"toney/internal/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -68,6 +70,14 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.CurrentNode.IsExpanded = !m.CurrentNode.IsExpanded
 				m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
 				return m, nil
+			}
+
+		case "c":
+			return m, func() tea.Msg {
+				return filepopup.PopupMessage{
+					Type: enums.FileCreate,
+					Show: true,
+				}
 			}
 
 		}
