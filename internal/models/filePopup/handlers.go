@@ -1,0 +1,103 @@
+package filepopup
+
+import (
+	"fmt"
+	"os"
+	"strings"
+
+	"toney/internal/enums"
+	filetree "toney/internal/fileTree"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func HandleEnter(m *FilePopup) (tea.Model, tea.Cmd) {
+	path := GetPath(m.Node)
+
+	switch m.Type {
+	case enums.FileCreate:
+		Create(path, m.TextInput.Value(), m.Node)
+	case enums.FileDelete:
+		Delete(path[0:len(path)-1], m.TextInput.Value())
+	case enums.FileRename:
+		Rename(path[0:len(path)-1], m.TextInput.Value())
+	case enums.FileMove:
+		Move(path[0:len(path)-1], m.TextInput.Value())
+	default:
+		fmt.Println("default")
+	}
+
+	return m, tea.Batch(func() tea.Msg {
+		return HidePopupMessage{}
+	},
+		func() tea.Msg {
+			return RefreshFileExplorerMsg{}
+		})
+}
+
+func Move(path string, value string) {
+	err := os.Rename(path, value)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
+
+func Rename(path string, value string) {
+	err := os.Rename(path, path+value)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
+
+func Delete(path string, value string) {
+	if value != "y" {
+		return
+	}
+
+	err := os.Remove(path)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
+
+func Create(path string, value string, n *filetree.Node) {
+	if !n.IsDirectory {
+		pathArr := strings.Split(path, "/")
+		pathArr = pathArr[0 : len(pathArr)-2]
+		path = strings.Join(pathArr, "/") + "/"
+	}
+
+	if strings.HasSuffix(value, "/") {
+		err := os.MkdirAll(path+value, 0o755)
+		if err != nil {
+			fmt.Println(err.Error())
+			// os.Exit(1)
+		}
+	} else {
+		_, err := os.Create(path + value)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+	}
+}
+
+func GetPath(n *filetree.Node) string {
+	c := n
+
+	home, _ := os.UserHomeDir()
+
+	path := ""
+
+	for {
+		if c == nil {
+			return home + "/" + path
+		}
+
+		path = c.Name + "/" + path
+		c = c.Parent
+	}
+}

@@ -20,6 +20,8 @@ type RootModel struct {
 	FilePopup     *filepopup.FilePopup
 }
 
+type RefreshFileExplorerMsg struct{}
+
 func NewRoot() *RootModel {
 	return &RootModel{
 		Page:      enums.Home,
@@ -34,9 +36,15 @@ func (m RootModel) Init() tea.Cmd {
 
 func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case filepopup.PopupMessage:
-		m.FilePopup = filepopup.NewPopup(msg.Type)
-		m.ShowPopup = msg.Show
+	case filepopup.ShowPopupMessage:
+		fmt.Println("Received PopupMessage", msg.Type)
+		m.FilePopup = filepopup.NewPopup(msg.Type, msg.Curr)
+		m.ShowPopup = true
+	case filepopup.HidePopupMessage:
+		fmt.Println("Hiding Popup")
+		m.ShowPopup = false
+	case filepopup.RefreshFileExplorerMsg:
+		m.Home.FileExplorer.Update(msg)
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -62,13 +70,10 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m RootModel) View() string {
+func (m *RootModel) View() string {
 	bg := m.Home
 
-	if m.ShowPopup {
-		f, _ := tea.LogToFile("debug.log", "debug")
-		f.WriteString(fmt.Sprintln("Showing Overlay"))
-		f.Close()
+	if m.ShowPopup && m.FilePopup != nil {
 		return lipgloss.Place(m.Width+2, m.Height+2, lipgloss.Center, lipgloss.Center, m.FilePopup.View())
 	}
 

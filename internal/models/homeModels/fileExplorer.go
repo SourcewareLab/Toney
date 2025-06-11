@@ -45,6 +45,11 @@ func (m FileExplorer) Init() tea.Cmd {
 
 func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case filepopup.RefreshFileExplorerMsg:
+		m.Root, _ = filetree.CreateTree()
+		m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
+		return m, nil
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -74,9 +79,31 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "c":
 			return m, func() tea.Msg {
-				return filepopup.PopupMessage{
+				return filepopup.ShowPopupMessage{
 					Type: enums.FileCreate,
-					Show: true,
+					Curr: m.CurrentNode,
+				}
+			}
+		case "d":
+			return m, func() tea.Msg {
+				return filepopup.ShowPopupMessage{
+					Type: enums.FileDelete,
+					Curr: m.CurrentNode,
+				}
+			}
+
+		case "m":
+			return m, func() tea.Msg {
+				return filepopup.ShowPopupMessage{
+					Type: enums.FileMove,
+					Curr: m.CurrentNode,
+				}
+			}
+		case "r":
+			return m, func() tea.Msg {
+				return filepopup.ShowPopupMessage{
+					Type: enums.FileRename,
+					Curr: m.CurrentNode,
 				}
 			}
 

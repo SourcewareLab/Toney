@@ -30,7 +30,7 @@ func (m HomeModel) Init() tea.Cmd {
 
 func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case filepopup.PopupMessage:
+	case filepopup.ShowPopupMessage:
 		return m, func() tea.Msg {
 			return msg
 		}
