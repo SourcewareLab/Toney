@@ -75,6 +75,12 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.CurrentNode.IsExpanded = !m.CurrentNode.IsExpanded
 				m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
 				return m, nil
+			} else {
+				return m, func() tea.Msg {
+					return ChangeFileMessage{
+						Path: filepopup.GetPath(m.CurrentNode),
+					}
+				}
 			}
 
 		case "c":

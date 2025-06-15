@@ -12,15 +12,15 @@ type HomeModel struct {
 	Width        int
 	Height       int
 	FocusOn      homemodels.Splits
-	FileExplorer homemodels.FileExplorer
-	Viewer       homemodels.Viewer
+	FileExplorer *homemodels.FileExplorer
+	Viewer       *homemodels.Viewer
 }
 
 func NewHome() *HomeModel {
 	return &HomeModel{
 		FocusOn:      homemodels.FViewer,
-		FileExplorer: *homemodels.NewFileExplorer(),
-		Viewer:       homemodels.Viewer{},
+		FileExplorer: homemodels.NewFileExplorer(),
+		Viewer:       homemodels.NewViewer(),
 	}
 }
 
@@ -34,7 +34,8 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, func() tea.Msg {
 			return msg
 		}
-
+	case homemodels.ChangeFileMessage:
+		m.Viewer.Update(msg)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
