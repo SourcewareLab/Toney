@@ -1,7 +1,9 @@
 package homemodels
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,8 +18,10 @@ type Viewer struct {
 	Width     int
 	Viewport  viewport.Model
 	Ready     bool
-	Content   string
 	Path      string
+	Renderer  *glamour.TermRenderer
+	isReading bool
+	CurrRead  string
 }
 
 func NewViewer() *Viewer {
@@ -27,17 +31,23 @@ func NewViewer() *Viewer {
 		Align(lipgloss.Center, lipgloss.Center).
 		BorderStyle(lipgloss.RoundedBorder()).
 		MarginTop(1).
+		Padding(1, 1).
 		BorderForeground(lipgloss.Color("#45475a"))
 	vp.SetContent("Select a file to view its contents")
 
 	return &Viewer{
-		Content:  "Select a file to view its contents",
-		Viewport: vp,
+		Viewport:  vp,
+		isReading: false,
 	}
 }
 
 type ChangeFileMessage struct {
 	Path string
+}
+
+type RefreshView struct {
+	Content string
+	Path    string
 }
 
 func (m Viewer) Init() tea.Cmd {
@@ -48,8 +58,8 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case ChangeFileMessage:
 		m.Path = msg.Path
-		m.Viewport.SetContent(RenderMarkdown(ReadFile(msg.Path)))
-		m.Viewport.YOffset = 0
+		content := m.ReadFile()
+		m.Viewport.SetContent(content)
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -59,6 +69,11 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.Height = msg.Height
 		m.Width = msg.Width
+
+		m.Renderer, _ = glamour.NewTermRenderer(
+			glamour.WithWordWrap(m.Width-2),
+			glamour.WithAutoStyle(),
+		)
 
 		m.Viewport.Width = m.Width*3/4 - 1
 		m.Viewport.Height = m.Height + 1
@@ -84,25 +99,28 @@ func (m Viewer) View() string {
 	}
 
 	return m.Viewport.View()
-	// return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("#45475a")).Render(m.Viewport.View())
-	// return style.Width(m.Width*3/4 - 2).Height(m.Height - 2).MarginTop(1).Render(RenderMarkdown(m.Viewport.View()))
 }
 
-func (m Viewer) Header() string {
+func (m *Viewer) Header() string {
 	return ""
 }
 
-func ReadFile(path string) string {
-	data, err := os.ReadFile(path[0 : len(path)-1])
+func (m *Viewer) ReadFile() string {
+	path := strings.TrimSuffix(m.Path, "/")
+
+	content, err := os.ReadFile(path)
 	if err != nil {
-		return "An error occurred when reading file!"
+		fmt.Println(err.Error())
+		content = ([]byte)(fmt.Sprintf("An error occured while reading the file\n%s", err.Error()))
 	}
 
-	return string(data)
+	rendered := m.RenderMarkdown(string(content), m.Width)
+
+	return rendered
 }
 
-func RenderMarkdown(md string) string {
-	out, _ := glamour.Render(md, "dark")
+func (m *Viewer) RenderMarkdown(md string, width int) string {
+	out, _ := m.Renderer.Render(md)
 
 	return out
 }

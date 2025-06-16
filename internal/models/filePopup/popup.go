@@ -79,10 +79,6 @@ func (m *FilePopup) View() string {
 	w := m.Width / 3
 	h := m.Height / 3
 
-	f, _ := tea.LogToFile("debug.log", "debug")
-	fmt.Fprintln(f, "Showing View")
-	f.Close()
-
 	return popupStyle.Width(w).Height(h).Render(GetText(m.Type, m.TextInput))
 }
 

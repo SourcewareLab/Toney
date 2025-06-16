@@ -3,6 +3,8 @@ package homemodels
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 
 	"toney/internal/enums"
 	filetree "toney/internal/fileTree"
@@ -14,14 +16,19 @@ import (
 )
 
 type FileExplorer struct {
-	path         string
-	IsFocused    bool
-	Width        int
-	Height       int
-	Root         *filetree.Node
-	CurrentNode  *filetree.Node
-	CurrentIndex int
-	VisibleNodes []*filetree.Node
+	path          string
+	IsFocused     bool
+	Width         int
+	Height        int
+	Root          *filetree.Node
+	CurrentNode   *filetree.Node
+	CurrentIndex  int
+	VisibleNodes  []*filetree.Node
+	LastSelection string
+}
+
+type EditorClose struct {
+	Err error
 }
 
 func NewFileExplorer() *FileExplorer {
@@ -58,30 +65,30 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.CurrentIndex >= len(m.VisibleNodes)-1 {
 				return m, nil
 			}
-
 			m.CurrentIndex += 1
 			m.CurrentNode = m.VisibleNodes[m.CurrentIndex]
-			return m, nil
+			return m, m.SelectionChanged(m.CurrentNode)
 		case "up":
 			if m.CurrentIndex <= 0 {
 				return m, nil
 			}
-
 			m.CurrentIndex -= 1
 			m.CurrentNode = m.VisibleNodes[m.CurrentIndex]
-			return m, nil
+			return m, m.SelectionChanged(m.CurrentNode)
 		case "enter":
 			if m.CurrentNode.IsDirectory {
 				m.CurrentNode.IsExpanded = !m.CurrentNode.IsExpanded
 				m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
 				return m, nil
-			} else {
-				return m, func() tea.Msg {
-					return ChangeFileMessage{
-						Path: filepopup.GetPath(m.CurrentNode),
-					}
-				}
 			}
+
+			c := exec.Command("nvim", strings.TrimSuffix(filepopup.GetPath(m.CurrentNode), "/"))
+			cmd := tea.ExecProcess(c, func(err error) tea.Msg {
+				return EditorClose{
+					Err: err,
+				}
+			})
+			return m, cmd
 
 		case "c":
 			return m, func() tea.Msg {
@@ -137,4 +144,19 @@ func (m FileExplorer) View() string {
 	s := filetree.BuildNodeTree(m.Root, "", len(m.Root.Children) == 0, m.CurrentNode)
 
 	return style.Width(w).Height(h).MarginTop(1).Render(s)
+}
+
+func (m *FileExplorer) SelectionChanged(node *filetree.Node) tea.Cmd {
+	path := filepopup.GetPath(node)
+	if node.IsDirectory || m.LastSelection == path {
+		return nil
+	}
+
+	m.LastSelection = path
+
+	return func() tea.Msg {
+		return ChangeFileMessage{
+			Path: path,
+		}
+	}
 }

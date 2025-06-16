@@ -18,7 +18,7 @@ type HomeModel struct {
 
 func NewHome() *HomeModel {
 	return &HomeModel{
-		FocusOn:      homemodels.FViewer,
+		FocusOn:      homemodels.File,
 		FileExplorer: homemodels.NewFileExplorer(),
 		Viewer:       homemodels.NewViewer(),
 	}
@@ -30,6 +30,8 @@ func (m HomeModel) Init() tea.Cmd {
 
 func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case homemodels.RefreshView:
+		return m.Viewer.Update(msg)
 	case filepopup.ShowPopupMessage:
 		return m, func() tea.Msg {
 			return msg
@@ -63,15 +65,7 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.FileExplorer.Update(msg)
 	}
 
-	var cmd tea.Cmd
-
-	if m.FileExplorer.IsFocused {
-		_, cmd = m.FileExplorer.Update(msg)
-	} else if m.Viewer.IsFocused {
-		_, cmd = m.Viewer.Update(msg)
-	}
-
-	return m, cmd
+	return m, nil
 }
 
 func (m HomeModel) View() string {

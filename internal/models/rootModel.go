@@ -5,6 +5,7 @@ import (
 
 	"toney/internal/enums"
 	filepopup "toney/internal/models/filePopup"
+	homemodels "toney/internal/models/homeModels"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -20,7 +21,12 @@ type RootModel struct {
 	FilePopup     *filepopup.FilePopup
 }
 
-type RefreshFileExplorerMsg struct{}
+type (
+	RefreshFileExplorerMsg struct{}
+	NvimDoneMsg            struct {
+		Err string
+	}
+)
 
 func NewRoot() *RootModel {
 	return &RootModel{
@@ -36,6 +42,8 @@ func (m RootModel) Init() tea.Cmd {
 
 func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case homemodels.RefreshView:
+		return m.Home.Update(msg)
 	case filepopup.ShowPopupMessage:
 		fmt.Println("Received PopupMessage", msg.Type)
 		m.FilePopup = filepopup.NewPopup(msg.Type, msg.Curr)
@@ -45,6 +53,12 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ShowPopup = false
 	case filepopup.RefreshFileExplorerMsg:
 		m.Home.FileExplorer.Update(msg)
+	case homemodels.EditorClose:
+		if msg.Err != nil {
+			fmt.Println(msg.Err.Error())
+		}
+
+		return m, nil
 
 	case tea.KeyMsg:
 		switch msg.String() {
