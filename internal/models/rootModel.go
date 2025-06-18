@@ -79,6 +79,7 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Err != nil {
 			fmt.Println(msg.Err.Error())
 		}
+		m.Home.FileExplorer.Update(msg)
 
 		return m, nil
 

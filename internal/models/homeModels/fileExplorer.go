@@ -54,6 +54,9 @@ func (m FileExplorer) Init() tea.Cmd {
 
 func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case EditorClose:
+		m.Refresh()
+		return m, m.SelectionChanged(m.CurrentNode)
 	case filepopup.RefreshFileExplorerMsg:
 		m.Refresh()
 		return m, nil

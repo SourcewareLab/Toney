@@ -39,7 +39,7 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return msg
 		}
 	case homemodels.ChangeFileMessage:
-		m.Viewer.Update(msg)
+		return m.Viewer.Update(msg)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
