@@ -31,7 +31,7 @@ type EditorClose struct {
 	Err error
 }
 
-func NewFileExplorer() *FileExplorer {
+func NewFileExplorer(w int, h int) *FileExplorer {
 	root, err := filetree.CreateTree()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -39,6 +39,8 @@ func NewFileExplorer() *FileExplorer {
 	}
 
 	return &FileExplorer{
+		Width:        w,
+		Height:       h,
 		Root:         root,
 		CurrentNode:  root,
 		CurrentIndex: 0,
@@ -53,8 +55,7 @@ func (m FileExplorer) Init() tea.Cmd {
 func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case filepopup.RefreshFileExplorerMsg:
-		m.Root, _ = filetree.CreateTree()
-		m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
+		m.Refresh()
 		return m, nil
 
 	case tea.KeyMsg:
@@ -121,10 +122,6 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		}
-	case tea.WindowSizeMsg:
-		m.Height = msg.Height
-		m.Width = msg.Width
-
 	}
 
 	return m, nil
@@ -159,4 +156,30 @@ func (m *FileExplorer) SelectionChanged(node *filetree.Node) tea.Cmd {
 			Path: path,
 		}
 	}
+}
+
+func (m *FileExplorer) Refresh() {
+	newRoot, _ := filetree.CreateTree()
+
+	filepopup.MapExpanded(newRoot, m.Root)
+
+	m.Root = newRoot
+	m.VisibleNodes = filetree.FlattenVisibleTree(newRoot)
+
+	idx := -1
+
+	for i, val := range m.VisibleNodes {
+		if val.Name == m.CurrentNode.Name && filepopup.GetPath(val) == filepopup.GetPath(m.CurrentNode) {
+			idx = i
+		}
+	}
+
+	if idx == -1 {
+		if m.CurrentIndex != 0 {
+			idx = m.CurrentIndex - 1
+		}
+	}
+
+	m.CurrentIndex = idx
+	m.CurrentNode = m.VisibleNodes[idx]
 }

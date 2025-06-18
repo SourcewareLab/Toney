@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"toney/internal/messages"
+
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -20,12 +22,10 @@ type Viewer struct {
 	Ready     bool
 	Path      string
 	Renderer  *glamour.TermRenderer
-	isReading bool
-	CurrRead  string
 }
 
-func NewViewer() *Viewer {
-	vp := viewport.New(0, 0)
+func NewViewer(w int, h int) *Viewer {
+	vp := viewport.New(w, h)
 	vp.YOffset = 0
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
@@ -36,8 +36,10 @@ func NewViewer() *Viewer {
 	vp.SetContent("Select a file to view its contents")
 
 	return &Viewer{
-		Viewport:  vp,
-		isReading: false,
+		Viewport: vp,
+		Height:   h,
+		Width:    w,
+		Renderer: nil,
 	}
 }
 
@@ -50,12 +52,28 @@ type RefreshView struct {
 	Path    string
 }
 
+func InitRenderer(w int) tea.Cmd {
+	return func() tea.Msg {
+		rnd, _ := glamour.NewTermRenderer(
+			glamour.WithWordWrap(w-2),
+			glamour.WithAutoStyle(),
+		)
+
+		return messages.RendererCreated{
+			Renderer: rnd,
+		}
+	}
+}
+
 func (m Viewer) Init() tea.Cmd {
 	return nil
 }
 
 func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case messages.RendererCreated:
+		m.Renderer = msg.Renderer
+		return m, nil
 	case ChangeFileMessage:
 		m.Path = msg.Path
 		content := m.ReadFile()
@@ -66,18 +84,6 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
-	case tea.WindowSizeMsg:
-		m.Height = msg.Height
-		m.Width = msg.Width
-
-		m.Renderer, _ = glamour.NewTermRenderer(
-			glamour.WithWordWrap(m.Width-2),
-			glamour.WithAutoStyle(),
-		)
-
-		m.Viewport.Width = m.Width*3/4 - 1
-		m.Viewport.Height = m.Height + 1
-		m.Viewport.YOffset = 0
 	}
 
 	var (

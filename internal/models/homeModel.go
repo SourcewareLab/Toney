@@ -16,11 +16,13 @@ type HomeModel struct {
 	Viewer       *homemodels.Viewer
 }
 
-func NewHome() *HomeModel {
+func NewHome(w int, h int) *HomeModel {
 	return &HomeModel{
+		Width:        w,
+		Height:       h,
 		FocusOn:      homemodels.File,
-		FileExplorer: homemodels.NewFileExplorer(),
-		Viewer:       homemodels.NewViewer(),
+		FileExplorer: homemodels.NewFileExplorer(w, h),
+		Viewer:       homemodels.NewViewer(w, h),
 	}
 }
 
@@ -56,13 +58,6 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.FileExplorer.Update(msg)
 			}
 		}
-
-	case tea.WindowSizeMsg:
-		m.Height = msg.Height - 2
-		m.Width = msg.Width - 2
-
-		m.Viewer.Update(msg)
-		m.FileExplorer.Update(msg)
 	}
 
 	return m, nil

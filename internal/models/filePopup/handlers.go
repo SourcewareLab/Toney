@@ -44,7 +44,10 @@ func Move(path string, value string) {
 }
 
 func Rename(path string, value string) {
-	err := os.Rename(path, path+value)
+	newpathArr := strings.Split(path, "/")
+	newpath := strings.Join(newpathArr[0:len(newpathArr)-1], "/") + "/" + value
+	fmt.Println(newpath)
+	err := os.Rename(path, newpath)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -82,6 +85,28 @@ func Create(path string, value string, n *filetree.Node) {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
+	}
+}
+
+func MapExpanded(new *filetree.Node, old *filetree.Node) {
+	if old.IsExpanded {
+		new.IsExpanded = true
+	}
+
+	if len(old.Children) != len(new.Children) {
+		return
+	}
+
+	for idx, val := range old.Children {
+		if val.Name != new.Children[idx].Name {
+			continue
+		}
+
+		if !val.IsDirectory || !new.Children[idx].IsDirectory {
+			continue
+		}
+
+		MapExpanded(new.Children[idx], val)
 	}
 }
 
