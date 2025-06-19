@@ -125,5 +125,5 @@ Toney is inspired by:
 
 ---
 
-> Made with 💀 by [Nucleo](https://github.com/NucleoFusion)
+> Made with 💀 by [Nucleo](https://github.com/NucleoFusion) & [SourcewareLab](https://discord.gg/X69MUr2DKm)
 
