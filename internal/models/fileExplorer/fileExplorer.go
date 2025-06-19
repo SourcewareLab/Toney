@@ -1,4 +1,4 @@
-package homemodels
+package fileexplorer
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	"toney/internal/enums"
 	filetree "toney/internal/fileTree"
+	"toney/internal/messages"
 	filepopup "toney/internal/models/filePopup"
 	"toney/internal/styles"
 
@@ -25,10 +26,6 @@ type FileExplorer struct {
 	CurrentIndex  int
 	VisibleNodes  []*filetree.Node
 	LastSelection string
-}
-
-type EditorClose struct {
-	Err error
 }
 
 func NewFileExplorer(w int, h int) *FileExplorer {
@@ -54,10 +51,10 @@ func (m FileExplorer) Init() tea.Cmd {
 
 func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case EditorClose:
+	case messages.EditorClose:
 		m.Refresh()
 		return m, m.SelectionChanged(m.CurrentNode)
-	case filepopup.RefreshFileExplorerMsg:
+	case messages.RefreshFileExplorerMsg:
 		m.Refresh()
 		return m, nil
 
@@ -88,7 +85,7 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			c := exec.Command("nvim", strings.TrimSuffix(filepopup.GetPath(m.CurrentNode), "/"))
 			cmd := tea.ExecProcess(c, func(err error) tea.Msg {
-				return EditorClose{
+				return messages.EditorClose{
 					Err: err,
 				}
 			})
@@ -96,14 +93,14 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "c":
 			return m, func() tea.Msg {
-				return filepopup.ShowPopupMessage{
+				return messages.ShowPopupMessage{
 					Type: enums.FileCreate,
 					Curr: m.CurrentNode,
 				}
 			}
 		case "d":
 			return m, func() tea.Msg {
-				return filepopup.ShowPopupMessage{
+				return messages.ShowPopupMessage{
 					Type: enums.FileDelete,
 					Curr: m.CurrentNode,
 				}
@@ -111,14 +108,14 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "m":
 			return m, func() tea.Msg {
-				return filepopup.ShowPopupMessage{
+				return messages.ShowPopupMessage{
 					Type: enums.FileMove,
 					Curr: m.CurrentNode,
 				}
 			}
 		case "r":
 			return m, func() tea.Msg {
-				return filepopup.ShowPopupMessage{
+				return messages.ShowPopupMessage{
 					Type: enums.FileRename,
 					Curr: m.CurrentNode,
 				}
@@ -155,7 +152,7 @@ func (m *FileExplorer) SelectionChanged(node *filetree.Node) tea.Cmd {
 	m.LastSelection = path
 
 	return func() tea.Msg {
-		return ChangeFileMessage{
+		return messages.ChangeFileMessage{
 			Path: path,
 		}
 	}

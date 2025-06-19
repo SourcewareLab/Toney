@@ -5,6 +5,7 @@ import (
 
 	"toney/internal/enums"
 	filetree "toney/internal/fileTree"
+	"toney/internal/messages"
 	"toney/internal/styles"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -36,15 +37,6 @@ func NewPopup(typ enums.PopupType, node *filetree.Node) *FilePopup {
 	}
 }
 
-type ShowPopupMessage struct {
-	Type enums.PopupType
-	Curr *filetree.Node
-}
-
-type HidePopupMessage struct{}
-
-type RefreshFileExplorerMsg struct{}
-
 func (m FilePopup) Init() tea.Cmd {
 	return nil
 }
@@ -60,7 +52,7 @@ func (m *FilePopup) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc":
 			return m, func() tea.Msg {
-				return HidePopupMessage{}
+				return messages.HidePopupMessage{}
 			}
 		case "enter":
 			return HandleEnter(m)

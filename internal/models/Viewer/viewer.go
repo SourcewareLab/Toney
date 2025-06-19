@@ -1,4 +1,4 @@
-package homemodels
+package viewer
 
 import (
 	"fmt"
@@ -13,7 +13,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// TODO: Integrate Loader/Spinner
 type Viewer struct {
 	IsFocused bool
 	Height    int
@@ -25,7 +24,7 @@ type Viewer struct {
 }
 
 func NewViewer(w int, h int) *Viewer {
-	vp := viewport.New(w, h)
+	vp := viewport.New(w*3/4, h)
 	vp.YOffset = 0
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
@@ -43,19 +42,10 @@ func NewViewer(w int, h int) *Viewer {
 	}
 }
 
-type ChangeFileMessage struct {
-	Path string
-}
-
-type RefreshView struct {
-	Content string
-	Path    string
-}
-
 func InitRenderer(w int) tea.Cmd {
 	return func() tea.Msg {
 		rnd, _ := glamour.NewTermRenderer(
-			glamour.WithWordWrap(w-2),
+			glamour.WithWordWrap(w*3/4-2),
 			glamour.WithAutoStyle(),
 		)
 
@@ -74,7 +64,7 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case messages.RendererCreated:
 		m.Renderer = msg.Renderer
 		return m, nil
-	case ChangeFileMessage:
+	case messages.ChangeFileMessage:
 		m.Path = msg.Path
 		content := m.ReadFile()
 		m.Viewport.SetContent(content)
