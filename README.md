@@ -25,6 +25,12 @@ go install github.com/SourcewareLab/Toney@latest
 
 This will download, build, and install the `Toney` binary into your `$GOBIN` (typically `$HOME/go/bin`).
 
+Run this command to ensure Toney is setup perfectly.
+
+```
+  Toney init
+```
+
 ### 🧪 Requirements
 
 - Go 1.16 or later
