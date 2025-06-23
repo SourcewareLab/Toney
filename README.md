@@ -15,6 +15,37 @@
 
 ---
 
+## 🚀 Installation
+
+You can install **Toney** directly using `go install`:
+
+```
+go install github.com/SourcewareLab/Toney@latest
+```
+
+This will download, build, and install the `Toney` binary into your `$GOBIN` (typically `$HOME/go/bin`).
+
+### 🧪 Requirements
+
+- Go 1.16 or later
+- Git (to fetch the module)
+
+Make sure your `GOBIN` is in your system's `PATH`:
+
+```
+export PATH=$PATH:$(go env GOBIN)
+```
+
+### ✅ Verify Installation
+
+Once installed, you can run:
+
+```
+Toney
+```
+
+---
+
 ## 🔑 Keybinds
 
 | Key Combination | Action                    |
@@ -34,21 +65,6 @@ Once the File Tree is focused (`F` or `Shift + F`):
 | **m**    | Move selected       |
 | **Enter**| Edit selected file  |
 
-
----
-
-## 📦 Installation
-
-> Prerequisites:  
-> - Go 1.22+  
-> - [Neovim](https://neovim.io/) installed (`nvim` command)
-
-```bash
-git clone https://github.com/NucleoFusion/Toney
-cd Toney
-go build -o toney ./cmd/toney
-./toney
-```
 
 ---
 
