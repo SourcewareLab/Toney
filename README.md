@@ -15,18 +15,62 @@
 
 ---
 
-## 📦 Installation
+## 🚀 Installation
 
-> Prerequisites:  
-> - Go 1.22+  
-> - [Neovim](https://neovim.io/) installed (`nvim` command)
+You can install **Toney** directly using `go install`:
 
-```bash
-git clone https://github.com/NucleoFusion/Toney
-cd Toney
-go build -o toney ./cmd/toney
-./toney
 ```
+go install github.com/SourcewareLab/Toney@latest
+```
+
+This will download, build, and install the `Toney` binary into your `$GOBIN` (typically `$HOME/go/bin`).
+
+Run this command to ensure Toney is setup perfectly.
+
+```
+  Toney init
+```
+
+### 🧪 Requirements
+
+- Go 1.16 or later
+- Git (to fetch the module)
+
+Make sure your `GOBIN` is in your system's `PATH`:
+
+```
+export PATH=$PATH:$(go env GOBIN)
+```
+
+### ✅ Verify Installation
+
+Once installed, you can run:
+
+```
+Toney
+```
+
+---
+
+## 🔑 Keybinds
+
+| Key Combination | Action                    |
+|-----------------|---------------------------|
+| **F** / **Shift + F** | Focus on File Tree         |
+| **V** / **Shift + V** | Focus on File Viewer       |
+
+### 📁 File Tree Focus Shortcuts
+
+Once the File Tree is focused (`F` or `Shift + F`):
+
+| Key      | Action         |
+|----------|----------------|
+| **c**    | Create a file/folder |
+| **d**    | Delete selected     |
+| **r**    | Rename selected     |
+| **m**    | Move selected       |
+| **Enter**| Edit selected file  |
+
 
 ---
 
@@ -37,7 +81,7 @@ go build -o toney ./cmd/toney
 - [ ] Overlay support
 - [ ] Viewer style improvements
 - [ ] Error popups
-- [ ] Separate package for messages
+- [X] Separate package for messages
 - [ ] Keybind refactor
 - [ ] Config file support (`~/.config/toney/config.yaml`)
 - [ ] Custom markdown renderer
@@ -125,5 +169,5 @@ Toney is inspired by:
 
 ---
 
-> Made with 💀 by [Nucleo](https://github.com/NucleoFusion)
+> Made with 💀 by [Nucleo](https://github.com/NucleoFusion) & [SourcewareLab](https://discord.gg/X69MUr2DKm)
 

@@ -3,9 +3,10 @@ package filepopup
 import (
 	"fmt"
 
-	"toney/internal/enums"
-	filetree "toney/internal/fileTree"
-	"toney/internal/styles"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
+	"github.com/SourcewareLab/Toney/internal/messages"
+	"github.com/SourcewareLab/Toney/internal/styles"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -36,15 +37,6 @@ func NewPopup(typ enums.PopupType, node *filetree.Node) *FilePopup {
 	}
 }
 
-type ShowPopupMessage struct {
-	Type enums.PopupType
-	Curr *filetree.Node
-}
-
-type HidePopupMessage struct{}
-
-type RefreshFileExplorerMsg struct{}
-
 func (m FilePopup) Init() tea.Cmd {
 	return nil
 }
@@ -60,7 +52,7 @@ func (m *FilePopup) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc":
 			return m, func() tea.Msg {
-				return HidePopupMessage{}
+				return messages.HidePopupMessage{}
 			}
 		case "enter":
 			return HandleEnter(m)

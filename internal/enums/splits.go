@@ -1,4 +1,4 @@
-package homemodels
+package enums
 
 type Splits int
 

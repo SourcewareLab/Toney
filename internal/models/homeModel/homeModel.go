@@ -1,8 +1,10 @@
-package models
+package homemodel
 
 import (
-	filepopup "toney/internal/models/filePopup"
-	homemodels "toney/internal/models/homeModels"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	"github.com/SourcewareLab/Toney/internal/messages"
+	viewer "github.com/SourcewareLab/Toney/internal/models/Viewer"
+	fileexplorer "github.com/SourcewareLab/Toney/internal/models/fileExplorer"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -11,18 +13,18 @@ import (
 type HomeModel struct {
 	Width        int
 	Height       int
-	FocusOn      homemodels.Splits
-	FileExplorer *homemodels.FileExplorer
-	Viewer       *homemodels.Viewer
+	FocusOn      enums.Splits
+	FileExplorer *fileexplorer.FileExplorer
+	Viewer       *viewer.Viewer
 }
 
 func NewHome(w int, h int) *HomeModel {
 	return &HomeModel{
 		Width:        w,
 		Height:       h,
-		FocusOn:      homemodels.File,
-		FileExplorer: homemodels.NewFileExplorer(w, h),
-		Viewer:       homemodels.NewViewer(w, h),
+		FocusOn:      enums.File,
+		FileExplorer: fileexplorer.NewFileExplorer(w, h),
+		Viewer:       viewer.NewViewer(w, h),
 	}
 }
 
@@ -32,29 +34,29 @@ func (m HomeModel) Init() tea.Cmd {
 
 func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case homemodels.RefreshView:
+	case messages.RefreshView:
 		return m.Viewer.Update(msg)
-	case filepopup.ShowPopupMessage:
+	case messages.ShowPopupMessage:
 		return m, func() tea.Msg {
 			return msg
 		}
-	case homemodels.ChangeFileMessage:
+	case messages.ChangeFileMessage:
 		return m.Viewer.Update(msg)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "F":
-			m.FocusOn = homemodels.File
+			m.FocusOn = enums.File
 			return m, nil
 		case "V":
-			m.FocusOn = homemodels.FViewer
+			m.FocusOn = enums.FViewer
 			return m, nil
 		default:
 			switch m.FocusOn {
-			case homemodels.FViewer:
+			case enums.FViewer:
 				return m.Viewer.Update(msg)
-			case homemodels.File:
+			case enums.File:
 				return m.FileExplorer.Update(msg)
 			}
 		}
@@ -67,9 +69,9 @@ func (m HomeModel) View() string {
 	m.FileExplorer.IsFocused = false
 	m.Viewer.IsFocused = false
 
-	if m.FocusOn == homemodels.File {
+	if m.FocusOn == enums.File {
 		m.FileExplorer.IsFocused = true
-	} else if m.FocusOn == homemodels.FViewer {
+	} else if m.FocusOn == enums.FViewer {
 		m.Viewer.IsFocused = true
 	}
 

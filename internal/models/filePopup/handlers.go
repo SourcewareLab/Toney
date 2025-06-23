@@ -5,8 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"toney/internal/enums"
-	filetree "toney/internal/fileTree"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
+	"github.com/SourcewareLab/Toney/internal/messages"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -28,10 +29,10 @@ func HandleEnter(m *FilePopup) (tea.Model, tea.Cmd) {
 	}
 
 	return m, tea.Batch(func() tea.Msg {
-		return HidePopupMessage{}
+		return messages.HidePopupMessage{}
 	},
 		func() tea.Msg {
-			return RefreshFileExplorerMsg{}
+			return messages.RefreshFileExplorerMsg{}
 		})
 }
 

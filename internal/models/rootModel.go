@@ -3,10 +3,11 @@ package models
 import (
 	"fmt"
 
-	"toney/internal/enums"
-	"toney/internal/messages"
-	filepopup "toney/internal/models/filePopup"
-	homemodels "toney/internal/models/homeModels"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	"github.com/SourcewareLab/Toney/internal/messages"
+	viewer "github.com/SourcewareLab/Toney/internal/models/Viewer"
+	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
+	homemodel "github.com/SourcewareLab/Toney/internal/models/homeModel"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,7 +18,7 @@ type RootModel struct {
 	Width         int
 	Height        int
 	Page          enums.Page
-	Home          *HomeModel
+	Home          *homemodel.HomeModel
 	ShowPopup     bool
 	FilePopupType enums.PopupType
 	FilePopup     *filepopup.FilePopup
@@ -25,13 +26,6 @@ type RootModel struct {
 	Loader        spinner.Model
 	isSized       bool
 }
-
-type (
-	RefreshFileExplorerMsg struct{}
-	NvimDoneMsg            struct {
-		Err string
-	}
-)
 
 func NewRoot() *RootModel {
 	loader := spinner.Model{}
@@ -66,20 +60,21 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case messages.HideLoader:
 		m.isLoading = false
 		return m, nil
-	case filepopup.ShowPopupMessage:
+	case messages.ShowPopupMessage:
 		m.FilePopup = filepopup.NewPopup(msg.Type, msg.Curr)
 		m.ShowPopup = true
-	case filepopup.HidePopupMessage:
+	case messages.HidePopupMessage:
 		fmt.Println("Hiding Popup")
 		m.ShowPopup = false
-	case filepopup.RefreshFileExplorerMsg:
+	case messages.RefreshFileExplorerMsg:
 		m.Home.FileExplorer.Update(msg)
 		return m, nil
-	case homemodels.EditorClose:
+	case messages.EditorClose:
 		if msg.Err != nil {
 			fmt.Println(msg.Err.Error())
 		}
 		m.Home.FileExplorer.Update(msg)
+		m.Home.Viewer.Update(msg)
 
 		return m, nil
 
@@ -97,9 +92,9 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.Height = msg.Height
 
-		m.Home = NewHome(msg.Width, msg.Height)
+		m.Home = homemodel.NewHome(msg.Width, msg.Height)
 
-		return m, homemodels.InitRenderer(msg.Width)
+		return m, viewer.InitRenderer(msg.Width)
 	}
 
 	var cmd tea.Cmd

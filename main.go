@@ -1,18 +1,7 @@
 package main
 
-import (
-	"fmt"
-
-	"toney/internal/models"
-
-	tea "github.com/charmbracelet/bubbletea"
-)
+import "github.com/SourcewareLab/Toney/cmd"
 
 func main() {
-	p := tea.NewProgram(models.NewRoot(), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		fmt.Println("Alas, error")
-		fmt.Println(err.Error())
-		return
-	}
+	cmd.Execute()
 }
