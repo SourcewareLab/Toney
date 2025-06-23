@@ -1,8 +1,8 @@
 package messages
 
 import (
-	"toney/internal/enums"
-	filetree "toney/internal/fileTree"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
 
 	"github.com/charmbracelet/glamour"
 )

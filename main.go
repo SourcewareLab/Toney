@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 
-	"toney/internal/models"
-
+	"github.com/SourcewareLab/Toney/internal/models"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
