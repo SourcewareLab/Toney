@@ -15,6 +15,28 @@
 
 ---
 
+## 🔑 Keybinds
+
+| Key Combination | Action                    |
+|-----------------|---------------------------|
+| **F** / **Shift + F** | Focus on File Tree         |
+| **V** / **Shift + V** | Focus on File Viewer       |
+
+### 📁 File Tree Focus Shortcuts
+
+Once the File Tree is focused (`F` or `Shift + F`):
+
+| Key      | Action         |
+|----------|----------------|
+| **c**    | Create a file/folder |
+| **d**    | Delete selected     |
+| **r**    | Rename selected     |
+| **m**    | Move selected       |
+| **Enter**| Edit selected file  |
+
+
+---
+
 ## 📦 Installation
 
 > Prerequisites:  
@@ -37,7 +59,7 @@ go build -o toney ./cmd/toney
 - [ ] Overlay support
 - [ ] Viewer style improvements
 - [ ] Error popups
-- [ ] Separate package for messages
+- [X] Separate package for messages
 - [ ] Keybind refactor
 - [ ] Config file support (`~/.config/toney/config.yaml`)
 - [ ] Custom markdown renderer
