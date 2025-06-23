@@ -37,7 +37,7 @@ go build -o toney ./cmd/toney
 - [ ] Overlay support
 - [ ] Viewer style improvements
 - [ ] Error popups
-- [ ] Separate package for messages
+- [X] Separate package for messages
 - [ ] Keybind refactor
 - [ ] Config file support (`~/.config/toney/config.yaml`)
 - [ ] Custom markdown renderer
