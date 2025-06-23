@@ -68,21 +68,6 @@ Once the File Tree is focused (`F` or `Shift + F`):
 
 ---
 
-## 📦 Installation
-
-> Prerequisites:  
-> - Go 1.22+  
-> - [Neovim](https://neovim.io/) installed (`nvim` command)
-
-```bash
-git clone https://github.com/NucleoFusion/Toney
-cd Toney
-go build -o toney ./cmd/toney
-./toney
-```
-
----
-
 ## 🗺 Roadmap
 
 ### Short Term Goals
