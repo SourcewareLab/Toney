@@ -6,11 +6,11 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/NucleoFusion/Toney/internal/enums"
-	filetree "github.com/NucleoFusion/Toney/internal/fileTree"
-	"github.com/NucleoFusion/Toney/internal/messages"
-	filepopup "github.com/NucleoFusion/Toney/internal/models/filePopup"
-	"github.com/NucleoFusion/Toney/internal/styles"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
+	"github.com/SourcewareLab/Toney/internal/messages"
+	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
+	"github.com/SourcewareLab/Toney/internal/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

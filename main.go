@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/NucleoFusion/Toney/internal/models"
+	"github.com/SourcewareLab/Toney/internal/models"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

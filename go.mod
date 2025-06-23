@@ -1,4 +1,4 @@
-module github.com/NucleoFusion/Toney
+module github.com/SourcewareLab/Toney
 
 go 1.24.2
 

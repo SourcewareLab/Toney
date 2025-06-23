@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/NucleoFusion/Toney/internal/messages"
+	"github.com/SourcewareLab/Toney/internal/messages"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"

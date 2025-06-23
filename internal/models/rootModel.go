@@ -3,11 +3,11 @@ package models
 import (
 	"fmt"
 
-	"github.com/NucleoFusion/Toney/internal/enums"
-	"github.com/NucleoFusion/Toney/internal/messages"
-	viewer "github.com/NucleoFusion/Toney/internal/models/Viewer"
-	filepopup "github.com/NucleoFusion/Toney/internal/models/filePopup"
-	homemodel "github.com/NucleoFusion/Toney/internal/models/homeModel"
+	"github.com/SourcewareLab/Toney/internal/enums"
+	"github.com/SourcewareLab/Toney/internal/messages"
+	viewer "github.com/SourcewareLab/Toney/internal/models/Viewer"
+	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
+	homemodel "github.com/SourcewareLab/Toney/internal/models/homeModel"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
