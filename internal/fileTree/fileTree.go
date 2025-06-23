@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"toney/internal/styles"
+	"github.com/NucleoFusion/Toney/internal/styles"
 )
 
 func CreateTree() (*Node, error) {

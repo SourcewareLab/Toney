@@ -3,10 +3,10 @@ package filepopup
 import (
 	"fmt"
 
-	"toney/internal/enums"
-	filetree "toney/internal/fileTree"
-	"toney/internal/messages"
-	"toney/internal/styles"
+	"github.com/NucleoFusion/Toney/internal/enums"
+	filetree "github.com/NucleoFusion/Toney/internal/fileTree"
+	"github.com/NucleoFusion/Toney/internal/messages"
+	"github.com/NucleoFusion/Toney/internal/styles"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"

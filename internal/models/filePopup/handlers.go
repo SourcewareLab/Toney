@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"toney/internal/enums"
-	filetree "toney/internal/fileTree"
-	"toney/internal/messages"
+	"github.com/NucleoFusion/Toney/internal/enums"
+	filetree "github.com/NucleoFusion/Toney/internal/fileTree"
+	"github.com/NucleoFusion/Toney/internal/messages"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

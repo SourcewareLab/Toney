@@ -1,10 +1,10 @@
 package homemodel
 
 import (
-	"toney/internal/enums"
-	"toney/internal/messages"
-	viewer "toney/internal/models/Viewer"
-	fileexplorer "toney/internal/models/fileExplorer"
+	"github.com/NucleoFusion/Toney/internal/enums"
+	"github.com/NucleoFusion/Toney/internal/messages"
+	viewer "github.com/NucleoFusion/Toney/internal/models/Viewer"
+	fileexplorer "github.com/NucleoFusion/Toney/internal/models/fileExplorer"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
