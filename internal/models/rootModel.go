@@ -74,6 +74,7 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			fmt.Println(msg.Err.Error())
 		}
 		m.Home.FileExplorer.Update(msg)
+		m.Home.Viewer.Update(msg)
 
 		return m, nil
 

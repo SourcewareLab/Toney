@@ -61,6 +61,8 @@ func (m Viewer) Init() tea.Cmd {
 
 func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case messages.EditorClose:
+		m.Viewport.SetContent(m.ReadFile())
 	case messages.RendererCreated:
 		m.Renderer = msg.Renderer
 		return m, nil
