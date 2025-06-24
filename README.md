@@ -2,7 +2,11 @@
 
 **Toney** is a fast, lightweight, terminal-based note-taking app for the modern developer. Built with [Bubbletea](https://github.com/charmbracelet/bubbletea), Toney brings a sleek TUI interface with markdown rendering, file navigation, and native Neovim editing – all in your terminal.
 
-https://github.com/user-attachments/assets/4e413f80-0c26-4a8e-8f4f-4649ee7bb972
+
+
+https://github.com/user-attachments/assets/bf2411e0-2a7e-4669-a12a-6ee1bb63b75b
+
+
 
 ---
 
