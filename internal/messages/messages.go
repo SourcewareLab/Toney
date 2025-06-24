@@ -3,8 +3,6 @@ package messages
 import (
 	"github.com/SourcewareLab/Toney/internal/enums"
 	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
-
-	"github.com/charmbracelet/glamour"
 )
 
 type (
@@ -14,10 +12,6 @@ type (
 
 	EditorClose struct {
 		Err error
-	}
-
-	RendererCreated struct {
-		Renderer *glamour.TermRenderer
 	}
 
 	ShowPopupMessage struct {

@@ -20,7 +20,6 @@ type Viewer struct {
 	Viewport  viewport.Model
 	Ready     bool
 	Path      string
-	Renderer  *glamour.TermRenderer
 }
 
 func NewViewer(w int, h int) *Viewer {
@@ -38,20 +37,6 @@ func NewViewer(w int, h int) *Viewer {
 		Viewport: vp,
 		Height:   h,
 		Width:    w,
-		Renderer: nil,
-	}
-}
-
-func InitRenderer(w int) tea.Cmd {
-	return func() tea.Msg {
-		rnd, _ := glamour.NewTermRenderer(
-			glamour.WithWordWrap(w*3/4-2),
-			glamour.WithAutoStyle(),
-		)
-
-		return messages.RendererCreated{
-			Renderer: rnd,
-		}
 	}
 }
 
@@ -63,9 +48,6 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case messages.EditorClose:
 		m.Viewport.SetContent(m.ReadFile())
-	case messages.RendererCreated:
-		m.Renderer = msg.Renderer
-		return m, nil
 	case messages.ChangeFileMessage:
 		m.Path = msg.Path
 		content := m.ReadFile()
@@ -118,7 +100,7 @@ func (m *Viewer) ReadFile() string {
 }
 
 func (m *Viewer) RenderMarkdown(md string, width int) string {
-	out, _ := m.Renderer.Render(md)
+	out, _ := glamour.Render(md, "dark")
 
 	return out
 }
