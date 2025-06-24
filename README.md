@@ -8,7 +8,7 @@ https://github.com/user-attachments/assets/4e413f80-0c26-4a8e-8f4f-4649ee7bb972
 
 ## ✨ Features
 
-- ⚡ **Blazingly Fast** – Minimal memory usage and snappy performance.
+- ⚡ **Fast** – Minimal memory usage and snappy performance.
 - 📝 **Markdown Renderer** – Styled previews via [`glamour`](https://github.com/charmbracelet/glamour).
 - 🧠 **Neovim Integration** – Edit your notes using your favorite editor (`nvim`).
 - 📂 **File Management** – Easily navigate, open, and manage markdown files.
