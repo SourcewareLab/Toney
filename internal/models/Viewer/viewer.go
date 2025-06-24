@@ -24,7 +24,7 @@ type Viewer struct {
 }
 
 func NewViewer(w int, h int) *Viewer {
-	vp := viewport.New(w*3/4, h)
+	vp := viewport.New(w*3/4, h+1)
 	vp.YOffset = 0
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
@@ -91,7 +91,7 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Viewer) View() string {
 	if m.IsFocused {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(lipgloss.Color("#bb9af7"))
+		m.Viewport.Style = m.Viewport.Style.BorderForeground(lipgloss.Color("#b4befe"))
 	} else {
 		m.Viewport.Style = m.Viewport.Style.BorderForeground(lipgloss.Color("#45475a"))
 	}
