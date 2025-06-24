@@ -132,7 +132,7 @@ func (m FileExplorer) View() string {
 	style = style.Align(lipgloss.Left, lipgloss.Top)
 
 	if m.IsFocused {
-		style = style.BorderForeground(lipgloss.Color("#bb9af7"))
+		style = style.BorderForeground(lipgloss.Color("#b4befe"))
 	}
 
 	w := (m.Width / 4) - 1
