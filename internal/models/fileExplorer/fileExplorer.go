@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/SourcewareLab/Toney/internal/config"
@@ -153,7 +154,18 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			c := exec.Command(config.AppConfig.Editor, strings.TrimSuffix(filepopup.GetPath(m.CurrentNode), "/"))
+			relPath := strings.TrimSuffix(filepopup.GetPath(m.CurrentNode), "/")
+			homeDir, _ := os.UserHomeDir()
+			var fullPath string
+			if strings.HasPrefix(relPath, "~") {
+				fullPath = filepath.Join(homeDir, relPath[1:])
+			} else if filepath.IsAbs(relPath) {
+				fullPath = relPath
+			} else {
+				fullPath = filepath.Join(homeDir, relPath)
+			}
+
+			c := exec.Command(config.AppConfig.Editor, fullPath)
 			cmd := tea.ExecProcess(c, func(err error) tea.Msg {
 				return messages.EditorClose{
 					Err: err,
