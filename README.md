@@ -90,6 +90,7 @@ Once the File Tree is focused (`F` or `Shift + F`):
   - [ ] Custom Styles
   - [ ] Custom Editor
   - [ ] Custom Notes Directory
+  - [ ] Custom Keybinds
 - [ ] Search In Notes
 - [ ] Search for Notes  
 - [ ] Keybind Helper (using Bubbles)
