@@ -57,7 +57,6 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case messages.RefreshFileExplorerMsg:
 		m.Refresh()
 		return m, nil
-
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -153,6 +152,11 @@ func (m FileExplorer) View() string {
 	}
 
 	return style.Width(w).Height(h).MarginTop(1).Render(s)
+}
+
+func (m *FileExplorer) Resize(w int, h int) {
+	m.Height = h
+	m.Width = w
 }
 
 func (m *FileExplorer) SelectionChanged(node *filetree.Node) tea.Cmd {

@@ -58,7 +58,7 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Height = msg.Height
 
 		m.Viewport.Height = msg.Height
-		m.Viewport.Width = msg.Width * 3 / 4
+		m.Viewport.Height = msg.Width * 3 / 4
 
 		return m, nil
 	case tea.KeyMsg:
