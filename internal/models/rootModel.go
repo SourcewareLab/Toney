@@ -71,7 +71,11 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.Height = msg.Height
 
-		m.Home = homemodel.NewHome(msg.Width, msg.Height)
+		if m.Home != nil { // Checking whether this is an app resize or app open
+			m.Home.Update(msg)
+		} else {
+			m.Home = homemodel.NewHome(msg.Width, msg.Height)
+		}
 
 		m.isLoading = false
 
