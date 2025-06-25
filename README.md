@@ -82,6 +82,18 @@ Once the File Tree is focused (`F` or `Shift + F`):
 
 ## 🗺 Roadmap
 
+### v2.0.0 Goals
+
+- [ ] Daily Tasks 
+- [ ] Journals
+- [ ] Config File
+  - [ ] Custom Styles
+  - [ ] Custom Editor
+  - [ ] Custom Notes Directory
+- [ ] Search In Notes
+- [ ] Search for Notes  
+- [ ] Keybind Helper (using Bubbles)
+
 ### Short Term Goals
 
 - [ ] Overlay support
