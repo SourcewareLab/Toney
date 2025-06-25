@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
 	"github.com/SourcewareLab/Toney/internal/messages"
@@ -83,7 +84,7 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			c := exec.Command("nvim", strings.TrimSuffix(filepopup.GetPath(m.CurrentNode), "/"))
+			c := exec.Command(config.AppConfig.Editor, strings.TrimSuffix(filepopup.GetPath(m.CurrentNode), "/"))
 			cmd := tea.ExecProcess(c, func(err error) tea.Msg {
 				return messages.EditorClose{
 					Err: err,
