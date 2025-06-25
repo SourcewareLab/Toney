@@ -7,5 +7,8 @@ type StylesConfig struct {
 }
 
 type Config struct {
-	Styles StylesConfig `mapstructure:"styles"`
+	NotePath   string       `mapstructure:"note_path"`
+	Editor     string       `mapstructure:"editor"`
+	KeyBinding string       `mapstructure:"keybinding"`
+	Styles     StylesConfig `mapstructure:"styles"`
 }

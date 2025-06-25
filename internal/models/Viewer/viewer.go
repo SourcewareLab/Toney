@@ -3,6 +3,7 @@ package viewer
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/SourcewareLab/Toney/internal/messages"
@@ -96,7 +97,9 @@ func (m *Viewer) Header() string {
 func (m *Viewer) ReadFile() string {
 	path := strings.TrimSuffix(m.Path, "/")
 
-	content, err := os.ReadFile(path)
+	homeDir, _ := os.UserHomeDir()
+	fullPath := filepath.Join(homeDir, path)
+	content, err := os.ReadFile(fullPath)
 	if err != nil {
 		fmt.Println(err.Error())
 		content = ([]byte)(fmt.Sprintf("An error occured while reading the file\n%s", err.Error()))

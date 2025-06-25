@@ -3,6 +3,7 @@ package filepopup
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/SourcewareLab/Toney/internal/enums"
@@ -111,19 +112,15 @@ func MapExpanded(new *filetree.Node, old *filetree.Node) {
 	}
 }
 
-func GetPath(n *filetree.Node) string {
-	c := n
-
-	home, _ := os.UserHomeDir()
-
-	path := ""
-
-	for {
-		if c == nil {
-			return home + "/" + path
-		}
-
-		path = c.Name + "/" + path
-		c = c.Parent
+func GetPath(node *filetree.Node) string {
+	if node == nil {
+		return ""
 	}
+
+	segments := []string{}
+	for n := node; n != nil; n = n.Parent {
+		segments = append([]string{n.Name}, segments...)
+	}
+
+	return filepath.Join(segments...)
 }

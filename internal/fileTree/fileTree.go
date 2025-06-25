@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/styles"
 )
 
 func CreateTree() (*Node, error) {
-	home, _ := os.UserHomeDir()
 
-	root, err := buildTree(nil, filepath.Join(home, ".toney"), 0)
+	root, err := buildTree(nil, config.NoteRootPath, 0)
 	if err != nil {
 		return nil, err
 	}
