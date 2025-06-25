@@ -1,17 +1,21 @@
 package filetree
 
 func FlattenVisibleTree(root *Node) []*Node {
-	var result []*Node
-	var walk func(n *Node, depth int)
+	if root == nil {
+		return []*Node{}
+	}
 
-	walk = func(n *Node, depth int) {
+	var result []*Node
+	var walk func(n *Node) // Removed unusued 'depth int', 0 references or implementations found for this across the project.
+
+	walk = func(n *Node) {
 		result = append(result, n)
 		if n.IsExpanded {
 			for _, child := range n.Children {
-				walk(child, depth+1)
+				walk(child)
 			}
 		}
 	}
-	walk(root, 0)
+	walk(root)
 	return result
 }

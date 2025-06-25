@@ -9,7 +9,10 @@ import (
 )
 
 func CreateTree() (*Node, error) {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
 
 	root, err := buildTree(nil, filepath.Join(home, ".toney"), 0)
 	if err != nil {
@@ -36,10 +39,18 @@ func buildTree(parent *Node, path string, depth int) (*Node, error) {
 	}
 
 	if node.IsDirectory {
-		files, _ := os.ReadDir(path)
+		files, err := os.ReadDir(path)
+		if err != nil {
+			return nil, err
+		}
+
 		for _, file := range files {
 			childPath := filepath.Join(path, file.Name())
-			child, _ := buildTree(&node, childPath, depth+1)
+			child, err := buildTree(&node, childPath, depth+1)
+			if err != nil {
+				return nil, err
+			}
+
 			node.Children = append(node.Children, child)
 		}
 	}

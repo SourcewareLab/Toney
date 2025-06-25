@@ -53,6 +53,14 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		content := m.ReadFile()
 		m.Viewport.SetContent(content)
 		return m, nil
+	case tea.WindowSizeMsg:
+		m.Width = msg.Width
+		m.Height = msg.Height
+
+		m.Viewport.Height = msg.Height
+		m.Viewport.Width = msg.Width * 3 / 4
+
+		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
