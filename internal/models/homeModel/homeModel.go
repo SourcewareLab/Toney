@@ -42,6 +42,14 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case messages.ChangeFileMessage:
 		return m.Viewer.Update(msg)
+	case tea.WindowSizeMsg:
+		m.Width = msg.Width
+		m.Height = msg.Height
+
+		m.FileExplorer.Resize(msg.Width, msg.Height)
+		m.Viewer = viewer.NewViewer(msg.Width, m.Height)
+
+		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
