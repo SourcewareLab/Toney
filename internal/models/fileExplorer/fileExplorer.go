@@ -27,6 +27,18 @@ type FileExplorer struct {
 	CurrentIndex  int
 	VisibleNodes  []*filetree.Node
 	LastSelection string
+	KeyMap        KeyMap
+}
+
+type KeyMap struct {
+	Up     string
+	Down   string
+	Select string
+	Quit   string
+	Create string
+	Delete string
+	Rename string
+	Move   string
 }
 
 func NewFileExplorer(w int, h int) *FileExplorer {
@@ -43,11 +55,68 @@ func NewFileExplorer(w int, h int) *FileExplorer {
 		CurrentNode:  root,
 		CurrentIndex: 0,
 		VisibleNodes: filetree.FlattenVisibleTree(root),
+		KeyMap:       LoadKeyMap(config.AppConfig.KeyBinding),
 	}
 }
 
 func (m FileExplorer) Init() tea.Cmd {
 	return nil
+}
+
+func LoadKeyMap(mode string) KeyMap {
+	var km KeyMap
+	switch mode {
+	case "vim":
+		km = KeyMap{
+			Up:     "k",
+			Down:   "j",
+			Select: "enter",
+			Quit:   "q",
+			Create: "a",
+			Delete: "d",
+			Rename: "r",
+			Move:   "m",
+		}
+	default:
+		km = KeyMap{
+			Up:     "up",
+			Down:   "down",
+			Select: "enter",
+			Quit:   "q",
+			Create: "c",
+			Delete: "d",
+			Rename: "r",
+			Move:   "m",
+		}
+	}
+
+	// Apply overrides
+	// if v, ok := overrides["create"]; ok {
+	// 	km.Create = v
+	// }
+	// if v, ok := overrides["delete"]; ok {
+	// 	km.Delete = v
+	// }
+	// if v, ok := overrides["rename"]; ok {
+	// 	km.Rename = v
+	// }
+	// if v, ok := overrides["move"]; ok {
+	// 	km.Move = v
+	// }
+	// if v, ok := overrides["up"]; ok {
+	// 	km.Up = v
+	// }
+	// if v, ok := overrides["down"]; ok {
+	// 	km.Down = v
+	// }
+	// if v, ok := overrides["select"]; ok {
+	// 	km.Select = v
+	// }
+	// if v, ok := overrides["quit"]; ok {
+	// 	km.Quit = v
+	// }
+
+	return km
 }
 
 func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -63,21 +132,21 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
-		case "down":
+		case m.KeyMap.Down:
 			if m.CurrentIndex >= len(m.VisibleNodes)-1 {
 				return m, nil
 			}
 			m.CurrentIndex += 1
 			m.CurrentNode = m.VisibleNodes[m.CurrentIndex]
 			return m, m.SelectionChanged(m.CurrentNode)
-		case "up":
+		case m.KeyMap.Up:
 			if m.CurrentIndex <= 0 {
 				return m, nil
 			}
 			m.CurrentIndex -= 1
 			m.CurrentNode = m.VisibleNodes[m.CurrentIndex]
 			return m, m.SelectionChanged(m.CurrentNode)
-		case "enter":
+		case m.KeyMap.Select:
 			if m.CurrentNode.IsDirectory {
 				m.CurrentNode.IsExpanded = !m.CurrentNode.IsExpanded
 				m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
@@ -92,14 +161,14 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			})
 			return m, cmd
 
-		case "c":
+		case m.KeyMap.Create:
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileCreate,
 					Curr: m.CurrentNode,
 				}
 			}
-		case "d":
+		case m.KeyMap.Delete:
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileDelete,
@@ -107,14 +176,14 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case "m":
+		case m.KeyMap.Move:
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileMove,
 					Curr: m.CurrentNode,
 				}
 			}
-		case "r":
+		case m.KeyMap.Rename:
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileRename,

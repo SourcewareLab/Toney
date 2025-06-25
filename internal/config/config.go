@@ -26,5 +26,9 @@ func SetConfig() {
 		log.Fatalf("unable to decode config: %v", err)
 	}
 
+	if AppConfig.KeyBinding == "" {
+		AppConfig.KeyBinding = "normal"
+	}
+
 	NoteRootPath = filepath.Join(home, AppConfig.NotePath)
 }
