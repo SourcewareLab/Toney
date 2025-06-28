@@ -11,7 +11,9 @@ type (
 	HideLoader struct{}
 
 	EditorClose struct {
-		Err error
+		Err      error
+		IsNative bool
+		Value    string
 	}
 
 	ShowPopupMessage struct {

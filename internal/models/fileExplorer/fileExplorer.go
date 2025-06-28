@@ -8,10 +8,12 @@ import (
 
 	"github.com/SourcewareLab/Toney/internal/enums"
 	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
+	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
 	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
 	"github.com/SourcewareLab/Toney/internal/styles"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -26,6 +28,7 @@ type FileExplorer struct {
 	CurrentIndex  int
 	VisibleNodes  []*filetree.Node
 	LastSelection string
+	Keymap        keymap.ExplorerKeyMap
 }
 
 func NewFileExplorer(w int, h int) *FileExplorer {
@@ -42,6 +45,7 @@ func NewFileExplorer(w int, h int) *FileExplorer {
 		CurrentNode:  root,
 		CurrentIndex: 0,
 		VisibleNodes: filetree.FlattenVisibleTree(root),
+		Keymap:       keymap.NewExplorerKeyMap(),
 	}
 }
 
@@ -58,24 +62,22 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Refresh()
 		return m, nil
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		case "down":
+		switch {
+		case key.Matches(msg, m.Keymap.Down):
 			if m.CurrentIndex >= len(m.VisibleNodes)-1 {
 				return m, nil
 			}
 			m.CurrentIndex += 1
 			m.CurrentNode = m.VisibleNodes[m.CurrentIndex]
 			return m, m.SelectionChanged(m.CurrentNode)
-		case "up":
+		case key.Matches(msg, m.Keymap.Up):
 			if m.CurrentIndex <= 0 {
 				return m, nil
 			}
 			m.CurrentIndex -= 1
 			m.CurrentNode = m.VisibleNodes[m.CurrentIndex]
 			return m, m.SelectionChanged(m.CurrentNode)
-		case "enter":
+		case key.Matches(msg, m.Keymap.OpenForEdit):
 			if m.CurrentNode.IsDirectory {
 				m.CurrentNode.IsExpanded = !m.CurrentNode.IsExpanded
 				m.VisibleNodes = filetree.FlattenVisibleTree(m.Root)
@@ -90,29 +92,28 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			})
 			return m, cmd
 
-		case "c":
+		case key.Matches(msg, m.Keymap.CreateFile):
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileCreate,
 					Curr: m.CurrentNode,
 				}
 			}
-		case "d":
+		case key.Matches(msg, m.Keymap.DeleteFile):
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileDelete,
 					Curr: m.CurrentNode,
 				}
 			}
-
-		case "m":
+		case key.Matches(msg, m.Keymap.MoveFile):
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileMove,
 					Curr: m.CurrentNode,
 				}
 			}
-		case "r":
+		case key.Matches(msg, m.Keymap.RenameFile):
 			return m, func() tea.Msg {
 				return messages.ShowPopupMessage{
 					Type: enums.FileRename,
@@ -135,7 +136,7 @@ func (m FileExplorer) View() string {
 	}
 
 	w := (m.Width / 4) - 1
-	h := m.Height - 2
+	h := m.Height - 3
 
 	s := filetree.BuildNodeTree(m.Root, "", len(m.Root.Children) == 0, m.CurrentNode)
 
