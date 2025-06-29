@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -20,10 +21,12 @@ type Viewer struct {
 	Viewport  viewport.Model
 	Ready     bool
 	Path      string
+	isEditing bool
+	Keymap    keymap.ViewerKeyMap
 }
 
 func NewViewer(w int, h int) *Viewer {
-	vp := viewport.New(w*3/4, h+1)
+	vp := viewport.New(w*3/4, h)
 	vp.YOffset = 0
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
@@ -34,9 +37,11 @@ func NewViewer(w int, h int) *Viewer {
 	vp.SetContent("Select a file to view its contents")
 
 	return &Viewer{
-		Viewport: vp,
-		Height:   h,
-		Width:    w,
+		Viewport:  vp,
+		Height:    h,
+		Width:     w,
+		isEditing: false,
+		Keymap:    keymap.NewViewerKeyMap(),
 	}
 }
 
@@ -47,10 +52,11 @@ func (m Viewer) Init() tea.Cmd {
 func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case messages.EditorClose:
-		m.Viewport.SetContent(m.ReadFile())
+		m.Viewport.SetContent(m.ReadFile(false))
+		return m, nil
 	case messages.ChangeFileMessage:
 		m.Path = msg.Path
-		content := m.ReadFile()
+		content := m.ReadFile(false)
 		m.Viewport.SetContent(content)
 		return m, nil
 	case tea.WindowSizeMsg:
@@ -61,11 +67,6 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Viewport.Height = msg.Width * 3 / 4
 
 		return m, nil
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		}
 	}
 
 	var (
@@ -74,6 +75,7 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	m.Viewport, cmd = m.Viewport.Update(msg)
+
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
@@ -93,13 +95,17 @@ func (m *Viewer) Header() string {
 	return ""
 }
 
-func (m *Viewer) ReadFile() string {
+func (m *Viewer) ReadFile(raw bool) string { // Change to editor type when config done
 	path := strings.TrimSuffix(m.Path, "/")
 
 	content, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println(err.Error())
-		content = ([]byte)(fmt.Sprintf("An error occured while reading the file\n%s", err.Error()))
+		content = ([]byte)(fmt.Sprintf("An error occured while reading the file:%s\n%s", m.Path, err.Error()))
+	}
+
+	if raw {
+		return string(content)
 	}
 
 	rendered := m.RenderMarkdown(string(content), m.Width)
