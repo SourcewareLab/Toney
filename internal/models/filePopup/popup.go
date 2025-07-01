@@ -8,14 +8,15 @@ import (
 	"github.com/SourcewareLab/Toney/internal/messages"
 	"github.com/SourcewareLab/Toney/internal/styles"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 var (
-	popupStyle  = styles.BorderStyle.Align(lipgloss.Left, lipgloss.Top).BorderForeground(lipgloss.Color("#b4befe"))
-	headerStyle = lipgloss.NewStyle().Background(lipgloss.Color("#b4befe")).Foreground(lipgloss.Color("#1e1e2e"))
+	popupStyle  = styles.BorderStyle.Align(lipgloss.Left, lipgloss.Top).BorderForeground(colors.ColorPalette().Lavender)
+	headerStyle = lipgloss.NewStyle().Background(colors.ColorPalette().Lavender).Foreground(colors.ColorPalette().Base)
 )
 
 type FilePopup struct {

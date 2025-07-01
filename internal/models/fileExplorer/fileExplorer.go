@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
 	"github.com/SourcewareLab/Toney/internal/keymap"
@@ -132,7 +133,7 @@ func (m FileExplorer) View() string {
 	style = style.Align(lipgloss.Left, lipgloss.Top)
 
 	if m.IsFocused {
-		style = style.BorderForeground(lipgloss.Color("#b4befe"))
+		style = style.BorderForeground(colors.ColorPalette().Lavender)
 	}
 
 	w := (m.Width / 4) - 1
