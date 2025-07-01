@@ -8,6 +8,7 @@ import (
 	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
 	homemodel "github.com/SourcewareLab/Toney/internal/models/homeModel"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -104,5 +105,5 @@ func (m *RootModel) View() string {
 		return lipgloss.Place(m.Width+2, m.Height+2, lipgloss.Center, lipgloss.Center, m.FilePopup.View())
 	}
 
-	return lipgloss.NewStyle().Background(lipgloss.Color("#1e1e2e")).Render(bg.View())
+	return lipgloss.NewStyle().Background(colors.Base).Render(bg.View())
 }

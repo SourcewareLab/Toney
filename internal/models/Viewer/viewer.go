@@ -8,6 +8,7 @@ import (
 	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -33,7 +34,7 @@ func NewViewer(w int, h int) *Viewer {
 		BorderStyle(lipgloss.RoundedBorder()).
 		MarginTop(1).
 		Padding(1, 1).
-		BorderForeground(lipgloss.Color("#45475a"))
+		BorderForeground(colors.Surface1)
 	vp.SetContent("Select a file to view its contents")
 
 	return &Viewer{
@@ -83,9 +84,9 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Viewer) View() string {
 	if m.IsFocused {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(lipgloss.Color("#b4befe"))
+		m.Viewport.Style = m.Viewport.Style.BorderForeground(colors.Lavender)
 	} else {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(lipgloss.Color("#45475a"))
+		m.Viewport.Style = m.Viewport.Style.BorderForeground(colors.Surface1)
 	}
 
 	return m.Viewport.View()
