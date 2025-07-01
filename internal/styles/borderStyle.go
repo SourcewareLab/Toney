@@ -9,4 +9,4 @@ var BorderStyle = lipgloss.NewStyle().
 	Padding(1, 2).
 	Align(lipgloss.Center, lipgloss.Center).
 	BorderStyle(lipgloss.RoundedBorder()).
-	BorderForeground(colors.Surface1)
+	BorderForeground(colors.ColorPalette().Surface1)

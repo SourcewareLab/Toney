@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	popupStyle  = styles.BorderStyle.Align(lipgloss.Left, lipgloss.Top).BorderForeground(colors.Lavender)
-	headerStyle = lipgloss.NewStyle().Background(colors.Lavender).Foreground(colors.Base)
+	popupStyle  = styles.BorderStyle.Align(lipgloss.Left, lipgloss.Top).BorderForeground(colors.ColorPalette().Lavender)
+	headerStyle = lipgloss.NewStyle().Background(colors.ColorPalette().Lavender).Foreground(colors.ColorPalette().Base)
 )
 
 type FilePopup struct {

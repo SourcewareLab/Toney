@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	filetree "github.com/SourcewareLab/Toney/internal/fileTree"
 	"github.com/SourcewareLab/Toney/internal/keymap"
@@ -13,7 +14,6 @@ import (
 	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
 	"github.com/SourcewareLab/Toney/internal/styles"
 
-	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -133,7 +133,7 @@ func (m FileExplorer) View() string {
 	style = style.Align(lipgloss.Left, lipgloss.Top)
 
 	if m.IsFocused {
-		style = style.BorderForeground(colors.Lavender)
+		style = style.BorderForeground(colors.ColorPalette().Lavender)
 	}
 
 	w := (m.Width / 4) - 1
