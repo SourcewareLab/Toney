@@ -1,12 +1,13 @@
 package daily
 
 import (
-	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
 	taskpopup "github.com/SourcewareLab/Toney/internal/models/taskPopup"
 	"github.com/SourcewareLab/Toney/internal/styles"
+	"github.com/SourcewareLab/Toney/internal/ui/theme"
+	"github.com/SourcewareLab/Toney/internal/ui/widgets"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -127,20 +128,38 @@ func (m *Daily) View() string {
 		return m.Popup.View()
 	}
 
-	main := lipgloss.JoinVertical(lipgloss.Left,
-		styles.GetDailyText(m.Width, m.Height/3),
-		lipgloss.Place(m.Width, 2*m.Height/3, lipgloss.Center, lipgloss.Center, m.List.View()))
+	pal := theme.DefaultDarkPalette()
+	header := widgets.Header{Palette: pal, Width: m.Width, Title: "Daily Tasks", Right: ""}.View()
+	footer := widgets.Footer{Palette: pal, Width: m.Width, Hints: []widgets.KeyHint{
+		{Key: "↑↓", Desc: "navigate"},
+		{Key: "enter", Desc: "select"},
+		{Key: "esc", Desc: "back"},
+	}}.View()
 
-	if len(m.List.Items()) == 0 {
-		main = lipgloss.JoinVertical(lipgloss.Left,
-			styles.GetDailyText(m.Width, m.Height/3),
-			lipgloss.Place(m.Width, 2*m.Height/3, lipgloss.Center, lipgloss.Top,
-				lipgloss.NewStyle().Foreground(colors.ColorPalette().Text).Render("You have no Tasks!")))
+	bodyH := m.Height - lipgloss.Height(header) - lipgloss.Height(footer)
+	if bodyH < 3 {
+		bodyH = 3
 	}
 
-	help := lipgloss.NewStyle().PaddingLeft(2).Render(m.Help.View(keymap.NewDynamic(m.Keymap.Bindings())))
+	// Compose top summary text and list inside a bordered box
+	summary := styles.GetDailyText(m.Width, bodyH/3)
+	listArea := lipgloss.Place(m.Width, 2*bodyH/3, lipgloss.Center, lipgloss.Center, m.List.View())
 
-	return lipgloss.JoinVertical(lipgloss.Left, main, help)
+	if len(m.List.Items()) == 0 {
+		listArea = lipgloss.Place(m.Width, 2*bodyH/3, lipgloss.Center, lipgloss.Top,
+			lipgloss.NewStyle().Foreground(pal.Fg).Render("You have no Tasks!"))
+	}
+
+	container := lipgloss.NewStyle().
+		Border(theme.Borders()).
+		BorderForeground(pal.Border).
+		Width(m.Width).
+		Height(bodyH).
+		Padding(0, 1)
+
+	body := container.Render(lipgloss.JoinVertical(lipgloss.Left, summary, listArea))
+
+	return lipgloss.JoinVertical(lipgloss.Left, header, body, footer)
 }
 
 func (m *Daily) Refresh() {

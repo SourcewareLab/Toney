@@ -7,5 +7,6 @@ const (
 	HomePage
 	DailyPage
 	DiaryPage
+	GitHubPage
 	Quit
 )

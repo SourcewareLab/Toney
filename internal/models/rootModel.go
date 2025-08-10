@@ -12,6 +12,7 @@ import (
 	"github.com/SourcewareLab/Toney/internal/models/daily"
 	"github.com/SourcewareLab/Toney/internal/models/diary"
 	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
+	"github.com/SourcewareLab/Toney/internal/models/github"
 	homemodel "github.com/SourcewareLab/Toney/internal/models/homeModel"
 	"github.com/SourcewareLab/Toney/internal/models/menu"
 
@@ -28,6 +29,7 @@ type RootModel struct {
 	Menu          *menu.Menu
 	Daily         *daily.Daily
 	Diary         *diary.Diary
+	GitHub        *github.GitHubModel
 	CurrentPage   enums.Page
 	ShowPopup     bool
 	FilePopupType enums.PopupType
@@ -75,6 +77,14 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Diary = d
 				return m, cmd
 			}
+		case enums.GitHubPage:
+			if m.GitHub != nil {
+				pg, cmd := m.GitHub.Update(msg)
+				if d, ok := pg.(*github.GitHubModel); ok { // Type matching, cause I cant assign it straightaway
+					m.GitHub = d
+					return m, cmd
+				}
+			}
 		}
 	case messages.TaskPopupMessage:
 		if m.CurrentPage == enums.DailyPage {
@@ -95,6 +105,19 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.CurrentPage = enums.DailyPage
 		case enums.DiaryPage:
 			m.CurrentPage = enums.DiaryPage
+		case enums.GitHubPage:
+			m.CurrentPage = enums.GitHubPage
+			// Always create a new model to handle setup vs issues dynamically
+			githubModel := github.NewGitHubSetupOrIssuesModel(m.Width, m.Height)
+			if gitHubIssuesModel, ok := githubModel.(*github.GitHubModel); ok {
+				m.GitHub = gitHubIssuesModel
+				// Auto-sync issues when entering the page if configured
+				return m, m.GitHub.SyncIssues()
+			} else {
+				// Handle setup model - we need to store it differently
+				// For now, we'll handle this in the View method
+				m.GitHub = nil
+			}
 		case enums.Quit:
 			return m, tea.Quit
 		}
@@ -189,6 +212,10 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			_, cmd = m.Daily.Update(msg)
 		case enums.DiaryPage:
 			_, cmd = m.Diary.Update(msg)
+		case enums.GitHubPage:
+			if m.GitHub != nil {
+				_, cmd = m.GitHub.Update(msg)
+			}
 		default:
 			fmt.Printf("UNHANDLED MSG: %#v\n", msg)
 		}
@@ -215,6 +242,11 @@ func (m *RootModel) View() string {
 		return m.Daily.View()
 	case enums.DiaryPage:
 		return m.Diary.View()
+	case enums.GitHubPage:
+		if m.GitHub != nil {
+			return m.GitHub.View()
+		}
+		return "GitHub model not initialized"
 	default:
 		return lipgloss.NewStyle().Background(colors.ColorPalette().Background).Render(m.Home.View())
 	}

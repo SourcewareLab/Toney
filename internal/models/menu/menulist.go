@@ -3,10 +3,11 @@ package menu
 import (
 	"strings"
 
-	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	"github.com/SourcewareLab/Toney/internal/messages"
+	"github.com/SourcewareLab/Toney/internal/ui/theme"
+	"github.com/SourcewareLab/Toney/internal/ui/widgets"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -20,7 +21,15 @@ type MenuList struct {
 }
 
 func NewMenuList(w int, h int, opts map[enums.Page]string) *MenuList {
-	selections := []enums.Page{enums.HomePage, enums.DailyPage, enums.DiaryPage, enums.Quit}
+	selections := []enums.Page{enums.HomePage, enums.DailyPage, enums.DiaryPage}
+
+	// Add GitHub option if it exists in the options map
+	if _, hasGitHub := opts[enums.GitHubPage]; hasGitHub {
+		selections = append(selections, enums.GitHubPage)
+	}
+
+	// Always add Quit at the end
+	selections = append(selections, enums.Quit)
 
 	return &MenuList{
 		Width:      w,
@@ -62,24 +71,64 @@ func (m *MenuList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *MenuList) View() string {
-	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(colors.ColorPalette().Border).Render(m.GetText())
+	pal := theme.DefaultDarkPalette()
+
+	// Header
+	header := widgets.Header{
+		Palette: pal,
+		Width:   m.Width,
+		Title:   "Toney · Menu",
+		Right:   "",
+	}.View()
+
+	// Body: bordered container for list
+	container := lipgloss.NewStyle().
+		Border(theme.Borders()).
+		BorderForeground(pal.Border).
+		Foreground(pal.Fg).
+		Width(m.Width).
+		Padding(0, 1)
+
+	// Estimate header/footer heights (~3 lines each including borders)
+	footer := widgets.Footer{
+		Palette: pal,
+		Width:   m.Width,
+		Hints: []widgets.KeyHint{
+			{Key: "↑↓", Desc: "navigate"},
+			{Key: "enter", Desc: "select"},
+			{Key: "esc", Desc: "back"},
+		},
+	}.View()
+
+	// Compute body height to avoid clipping
+	headerH := lipgloss.Height(header)
+	footerH := lipgloss.Height(footer)
+	bodyH := m.Height - headerH - footerH
+	if bodyH < 3 {
+		bodyH = 3
+	}
+
+	body := container.Height(bodyH).Render(m.GetTextStyled(pal))
+
+	return lipgloss.JoinVertical(lipgloss.Left,
+		header,
+		body,
+		footer,
+	)
 }
 
-func (m *MenuList) GetText() string {
+func (m *MenuList) GetTextStyled(pal theme.Palette) string {
 	text := ""
-	style := lipgloss.NewStyle().Width(m.Width).Padding(0, 2).Foreground(colors.ColorPalette().Text)
+	base := lipgloss.NewStyle().Width(m.Width-4).Padding(0, 1).Foreground(pal.Fg)
+	sel := base.Foreground(pal.SelectedFg).Background(pal.SelectedBg).Bold(true)
 
 	for idx, val := range m.Selections {
 		line := m.Options[val]
 		if m.Selected == idx {
-			text += style.Background(colors.ColorPalette().MenuSelectedBg).
-				Foreground(colors.ColorPalette().MenuSelectedText).
-				Render(line) + "\n"
-
+			text += sel.Render(line) + "\n"
 			continue
 		}
-
-		text += style.Render(line) + "\n"
+		text += base.Render(line) + "\n"
 	}
 
 	return strings.TrimSuffix(text, "\n")
