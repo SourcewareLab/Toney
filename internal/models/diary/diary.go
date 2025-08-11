@@ -44,11 +44,10 @@ func NewDiary(w int, h int) *Diary {
 		glamour.WithWordWrap(w))
 	content, _ := r.Render(ReadDiary(dirpath, today))
 
-	pal := colors.ColorPalette()
 	vp := viewport.New(w, h-1)
 	vp.Style = styles.BorderStyle().
-		BorderForeground(pal.Border).
-		Foreground(pal.Text)
+		BorderForeground(colors.ColorPalette().Border).
+		Foreground(colors.ColorPalette().Text)
 	vp.SetContent(content)
 
 	files, _ := AllFiles(dirpath)

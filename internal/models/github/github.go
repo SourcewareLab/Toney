@@ -339,24 +339,20 @@ func (m *GitHubModel) View() string {
 	if m.showingIssue && m.selectedIssue != nil {
 		return m.renderIssueOverlay()
 	}
-	if m.showingIssue && m.selectedIssue != nil {
-		return m.renderIssueOverlay()
-	}
 	return m.renderIssuesView()
 }
 
 func (m *GitHubModel) renderDisabledView() string {
-	pal := colors.ColorPalette()
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(pal.Border).
+		BorderForeground(colors.ColorPalette().Border).
 		Padding(1, 2).
 		Width(m.Width)
 	content := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Render("GitHub integration is disabled.\n\nRun 'toney github setup' to enable it.")
 	help := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
 		Render("esc: back")
 	return lipgloss.JoinVertical(lipgloss.Left,
@@ -366,7 +362,6 @@ func (m *GitHubModel) renderDisabledView() string {
 }
 
 func (m *GitHubModel) renderLoadingView() string {
-	pal := colors.ColorPalette()
 	repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
 
 	// Helper function for responsive width
@@ -381,20 +376,20 @@ func (m *GitHubModel) renderLoadingView() string {
 		Padding(1, 2).
 		Align(lipgloss.Center, lipgloss.Center).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(pal.Border)
+		BorderForeground(colors.ColorPalette().Border)
 
 	titleStyle := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	loadingStyle := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	descStyle := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Margin(0, 0, 1, 0)
 
 	content := lipgloss.JoinVertical(
@@ -413,7 +408,7 @@ func (m *GitHubModel) renderLoadingView() string {
 
 	// Footer
 	navigation := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
 		Render("esc: back")
 
@@ -426,7 +421,6 @@ func (m *GitHubModel) renderLoadingView() string {
 }
 
 func (m *GitHubModel) renderErrorView() string {
-	pal := colors.ColorPalette()
 	// Calculate responsive dimensions
 	availableHeight := m.Height - 3
 
@@ -441,20 +435,20 @@ func (m *GitHubModel) renderErrorView() string {
 		Padding(1, 2).
 		Align(lipgloss.Center, lipgloss.Center).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(pal.Border)
+		BorderForeground(colors.ColorPalette().Border)
 
 	titleStyle := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	errorStyle := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	descStyle := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		Margin(0, 0, 1, 0)
 
 	content := lipgloss.JoinVertical(
@@ -472,7 +466,7 @@ func (m *GitHubModel) renderErrorView() string {
 	centeredContent := contentContainer.Render(containerStyle.Render(content))
 
 	navigation := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
 		Render("r: retry • esc: back")
 

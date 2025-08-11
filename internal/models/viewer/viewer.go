@@ -30,17 +30,16 @@ type Viewer struct {
 func NewViewer(w int, h int) *Viewer {
 	vp := viewport.New(w*3/4, h)
 	vp.YOffset = 0
-	pal := colors.ColorPalette()
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
 		BorderStyle(lipgloss.RoundedBorder()).
 		MarginTop(0).
 		Padding(1, 1).
-		BorderForeground(pal.Border).
-		Foreground(pal.Text)
+		BorderForeground(colors.ColorPalette().Border).
+		Foreground(colors.ColorPalette().Text)
 	vp.SetContent(
 		lipgloss.Place(w*3/4, h-2, lipgloss.Center, lipgloss.Center,
-			lipgloss.NewStyle().Foreground(pal.Text).Render("Select a file to view its contents"),
+			lipgloss.NewStyle().Foreground(colors.ColorPalette().Text).Render("Select a file to view its contents"),
 		))
 
 	r, _ := glamour.NewTermRenderer(glamour.WithStyles(config.ToGlamourStyle(config.AppConfig.Styles.Renderer)),
@@ -94,15 +93,14 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Viewer) View() string {
-	pal := colors.ColorPalette()
 	if m.IsFocused {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.FocusedBorder)
+		m.Viewport.Style = m.Viewport.Style.BorderForeground(colors.ColorPalette().FocusedBorder)
 	} else {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.Border)
+		m.Viewport.Style = m.Viewport.Style.BorderForeground(colors.ColorPalette().Border)
 	}
 	// Simple help line at the bottom, no header/footer widgets
 	help := lipgloss.NewStyle().
-		Foreground(pal.Text).
+		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
 		Render("esc: back")
 	// Ensure viewport height fits above help line
@@ -114,7 +112,7 @@ func (m Viewer) View() string {
 	m.Viewport.Height = bodyH
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(pal.Border).
+		BorderForeground(colors.ColorPalette().Border).
 		Width(m.Width).
 		Height(bodyH).
 		Padding(0, 0)
