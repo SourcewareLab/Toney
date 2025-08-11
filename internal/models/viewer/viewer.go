@@ -8,8 +8,7 @@ import (
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
-	"github.com/SourcewareLab/Toney/internal/ui/theme"
-	"github.com/SourcewareLab/Toney/internal/ui/widgets"
+	"github.com/SourcewareLab/Toney/internal/styles"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -31,10 +30,10 @@ type Viewer struct {
 func NewViewer(w int, h int) *Viewer {
 	vp := viewport.New(w*3/4, h)
 	vp.YOffset = 0
-	pal := theme.DefaultDarkPalette()
+	pal := styles.DefaultDarkPalette()
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
-		BorderStyle(theme.Borders()).
+		BorderStyle(styles.Borders()).
 		MarginTop(0).
 		Padding(1, 1).
 		BorderForeground(pal.Border).
@@ -95,15 +94,15 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Viewer) View() string {
-	pal := theme.DefaultDarkPalette()
+	pal := styles.DefaultDarkPalette()
 	if m.IsFocused {
 		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.Accent)
 	} else {
 		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.Border)
 	}
 
-	header := widgets.Header{Palette: pal, Width: m.Width, Title: "Viewer", Right: m.Path}.View()
-	footer := widgets.Footer{Palette: pal, Width: m.Width, Hints: []widgets.KeyHint{{Key: "esc", Desc: "back"}}}.View()
+	header := styles.Header{Palette: pal, Width: m.Width, Title: "Viewer", Right: m.Path}.View()
+	footer := styles.Footer{Palette: pal, Width: m.Width, Hints: []styles.KeyHint{{Key: "esc", Desc: "back"}}}.View()
 	// Ensure viewport height fits between header and footer
 	bodyH := m.Height - lipgloss.Height(header) - lipgloss.Height(footer)
 	if bodyH < 3 {
@@ -112,7 +111,7 @@ func (m Viewer) View() string {
 	m.Viewport.Width = m.Width
 	m.Viewport.Height = bodyH
 	box := lipgloss.NewStyle().
-		Border(theme.Borders()).
+		Border(styles.Borders()).
 		BorderForeground(pal.Border).
 		Width(m.Width).
 		Height(bodyH).

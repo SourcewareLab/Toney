@@ -13,8 +13,6 @@ import (
 	"github.com/SourcewareLab/Toney/internal/messages"
 	"github.com/SourcewareLab/Toney/internal/models/fzf"
 	"github.com/SourcewareLab/Toney/internal/styles"
-	"github.com/SourcewareLab/Toney/internal/ui/theme"
-	"github.com/SourcewareLab/Toney/internal/ui/widgets"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -45,7 +43,7 @@ func NewDiary(w int, h int) *Diary {
 		glamour.WithWordWrap(w))
 	content, _ := r.Render(ReadDiary(dirpath, today))
 
-	pal := theme.DefaultDarkPalette()
+	pal := styles.DefaultDarkPalette()
 	vp := viewport.New(w, h-1)
 	vp.Style = styles.BorderStyle().
 		BorderForeground(pal.Border).
@@ -133,22 +131,8 @@ func (m *Diary) View() string {
 		return m.Finder.View()
 	}
 
-	pal := theme.DefaultDarkPalette()
-	header := widgets.Header{Palette: pal, Width: m.Width, Title: "Diary", Right: m.CurrFileName}.View()
-	footer := widgets.Footer{Palette: pal, Width: m.Width, Hints: []widgets.KeyHint{{Key: "e", Desc: "edit"}, {Key: "f", Desc: "find"}, {Key: "esc", Desc: "back"}}}.View()
-	bodyH := m.Height - lipgloss.Height(header) - lipgloss.Height(footer)
-	if bodyH < 3 {
-		bodyH = 3
-	}
-	m.Vp.Width = m.Width
-	m.Vp.Height = bodyH
-	container := lipgloss.NewStyle().
-		Border(theme.Borders()).
-		BorderForeground(pal.Border).
-		Width(m.Width).
-		Height(bodyH).
-		Padding(0, 1)
-	return lipgloss.JoinVertical(lipgloss.Left, header, container.Render(m.Vp.View()), footer)
+	return lipgloss.JoinVertical(lipgloss.Left, m.Vp.View(),
+		lipgloss.NewStyle().PaddingLeft(2).Render(m.Help.View(keymap.NewDynamic(m.Keymap.Bindings()))))
 }
 
 func (m *Diary) Refresh() {

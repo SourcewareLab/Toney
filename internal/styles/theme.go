@@ -1,4 +1,4 @@
-package theme
+package styles
 
 import (
 	"github.com/charmbracelet/lipgloss"
@@ -19,20 +19,20 @@ type Palette struct {
 	Success    lipgloss.Color
 }
 
-// DefaultDarkPalette returns a tasteful Crush-like dark palette.
+// DefaultDarkPalette returns a standard dark palette.
 func DefaultDarkPalette() Palette {
 	return Palette{
-		Bg:         lipgloss.Color("#0b0f14"), // near-black
-		Fg:         lipgloss.Color("#d3d7de"), // light gray
-		Muted:      lipgloss.Color("#7b8794"), // muted gray
-		Border:     lipgloss.Color("#2a2f3a"), // subtle border
-		Accent:     lipgloss.Color("#4fd1c5"), // teal
-		AccentAlt:  lipgloss.Color("#a78bfa"), // purple alt
-		SelectedBg: lipgloss.Color("#185b57"), // dark teal bg
-		SelectedFg: lipgloss.Color("#e6fffb"), // near-white fg
-		Error:      lipgloss.Color("#f87171"),
-		Warning:    lipgloss.Color("#fbbf24"),
-		Success:    lipgloss.Color("#34d399"),
+		Bg:         lipgloss.Color("#1a1a1a"), // dark gray
+		Fg:         lipgloss.Color("#ffffff"), // white
+		Muted:      lipgloss.Color("#808080"), // gray
+		Border:     lipgloss.Color("#444444"), // medium gray
+		Accent:     lipgloss.Color("#00aaff"), // blue
+		AccentAlt:  lipgloss.Color("#ff6600"), // orange
+		SelectedBg: lipgloss.Color("#0066cc"), // darker blue
+		SelectedFg: lipgloss.Color("#ffffff"), // white
+		Error:      lipgloss.Color("#ff4444"),
+		Warning:    lipgloss.Color("#ffaa00"),
+		Success:    lipgloss.Color("#00cc44"),
 	}
 }
 

@@ -45,7 +45,7 @@ func (api *GitHubAPI) FetchIssues() ([]GitHubIssue, error) {
 	req.Header.Set("User-Agent", "Toney-GitHub-Integration")
 
 	q := req.URL.Query()
-	q.Add("state", "all")
+	q.Add("state", "open")
 	q.Add("per_page", "100")
 	q.Add("sort", "updated")
 	q.Add("direction", "desc")
