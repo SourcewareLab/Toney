@@ -40,12 +40,10 @@ func (api *GitHubAPI) FetchIssues() ([]GitHubIssue, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Set headers
 	req.Header.Set("Authorization", "Bearer "+api.token)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "Toney-GitHub-Integration")
 
-	// Add query parameters to get both open and closed issues
 	q := req.URL.Query()
 	q.Add("state", "all")
 	q.Add("per_page", "100")
@@ -74,7 +72,6 @@ func (api *GitHubAPI) FetchIssues() ([]GitHubIssue, error) {
 		return nil, fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
-	// Convert API response to our internal format
 	issues := make([]GitHubIssue, len(apiIssues))
 	for i, apiIssue := range apiIssues {
 		issues[i] = GitHubIssue{
@@ -93,7 +90,6 @@ func (api *GitHubAPI) FetchIssues() ([]GitHubIssue, error) {
 	return issues, nil
 }
 
-// GitHubAPIIssue represents the full GitHub API response structure
 type GitHubAPIIssue struct {
 	Number    int           `json:"number"`
 	Title     string        `json:"title"`

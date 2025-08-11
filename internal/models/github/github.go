@@ -177,13 +177,10 @@ func (i GitHubIssue) FilterValue() string {
 	return i.IssueTitle
 }
 
-// (Title/Description implementations appear below with richer content)
-
 func (i GitHubIssue) Title() string {
 	if i.IssueTitle == "" {
 		return fmt.Sprintf("Issue #%d", i.Number)
 	}
-	// Keep it clean; styles are handled by list delegate/theme
 	status := "OPEN"
 	if i.State == "closed" {
 		status = "CLOSED"
@@ -197,7 +194,6 @@ func (i GitHubIssue) Description() string {
 	if len(desc) > 80 {
 		desc = desc[:77] + "..."
 	}
-	// Labels summary (unstyled; palette applied by container)
 	labels := ""
 	if len(i.Labels) > 0 {
 		labelNames := make([]string, len(i.Labels))
@@ -222,14 +218,12 @@ func NewGitHubModel(w int, h int) *GitHubModel {
 	delegate := issueDelegate{pal: pal}
 
 	l := list.New(items, delegate, w/2, 2*h/3)
-	// We'll render our own header; keep title/help/pagination minimal
 	l.Title = ""
 	l.SetShowStatusBar(true)
 	l.SetFilteringEnabled(true)
 	l.SetShowHelp(false)
 	l.SetShowPagination(true)
 
-	// Apply color palette to list chrome
 	l.Styles.Title = lipgloss.NewStyle().
 		Foreground(pal.Fg).
 		Border(lipgloss.RoundedBorder()).
@@ -253,18 +247,14 @@ func NewGitHubModel(w int, h int) *GitHubModel {
 }
 
 func NewGitHubSetupOrIssuesModel(w int, h int) tea.Model {
-	// Check if GitHub is properly configured
 	if !config.AppConfig.GitHub.Enabled ||
 		config.AppConfig.GitHub.Token == "" ||
 		config.AppConfig.GitHub.Owner == "" ||
 		config.AppConfig.GitHub.Repo == "" {
-		// Return setup model if not configured
 		return NewGitHubSetupModel()
 	}
 
-	// Return issues model if configured
 	model := NewGitHubModel(w, h)
-	// Auto-load issues when entering the page
 	model.Loading = true
 	return model
 }
@@ -293,7 +283,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.applyListItems()
 
 	case OpenEditorMsg:
-		// Open the note file in the configured editor
 		return m, m.openFileInEditor(msg.FilePath, msg.IssueTitle)
 
 	case tea.KeyMsg:
@@ -306,26 +295,22 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.showHelp = !m.showHelp
 			return m, nil
 		case "r", "ctrl+r":
-			// Refresh issues
 			m.Loading = true
 			m.Error = ""
 			return m, m.SyncIssues()
 
 		case "enter":
-			// Convert selected issue to note and open in editor
 			if len(m.Issues) > 0 && m.List.Index() < len(m.Issues) {
 				selectedIssue := m.Issues[m.List.Index()]
 				return m, m.convertIssueToNote(selectedIssue)
 			}
 
 		case "c":
-			// Convert selected issue to note (alternative key)
 			if len(m.Issues) > 0 && m.List.Index() < len(m.Issues) {
 				selectedIssue := m.Issues[m.List.Index()]
 				return m, m.convertIssueToNote(selectedIssue)
 			}
 		case "f":
-			// Cycle filter: all -> open -> closed -> all
 			switch m.filterState {
 			case "all":
 				m.filterState = "open"
@@ -337,7 +322,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.applyListItems()
 			return m, nil
 		case "s":
-			// Toggle sort by title/updated
 			if m.sortBy == "title" {
 				m.sortBy = "updated"
 			} else {
@@ -346,7 +330,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.applyListItems()
 			return m, nil
 		case "esc":
-			// Return to main menu
 			return m, func() tea.Msg {
 				return messages.ChangePage{
 					Page: enums.MenuPage,
@@ -364,7 +347,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // applyListItems filters, sorts, and loads issues into the list
 func (m *GitHubModel) applyListItems() {
-	// Filter by state
 	filtered := make([]GitHubIssue, 0, len(m.Issues))
 	for _, is := range m.Issues {
 		switch m.filterState {
@@ -385,10 +367,9 @@ func (m *GitHubModel) applyListItems() {
 	switch m.sortBy {
 	case "updated":
 		sort.Slice(filtered, func(i, j int) bool {
-			// Desc by updated string (ISO8601 compares well lexicographically)
 			return filtered[i].UpdatedAt > filtered[j].UpdatedAt
 		})
-	default: // title
+	default: 
 		sort.Slice(filtered, func(i, j int) bool {
 			return strings.ToLower(filtered[i].IssueTitle) < strings.ToLower(filtered[j].IssueTitle)
 		})
@@ -503,9 +484,8 @@ func (m *GitHubModel) renderLoadingView() string {
 func (m *GitHubModel) renderErrorView() string {
 	pal := theme.DefaultDarkPalette()
 	// Calculate responsive dimensions
-	availableHeight := m.Height - 3 // Reserve space for navigation at bottom
+	availableHeight := m.Height - 3 
 
-	// Helper function for responsive width
 	maxWidth := 80
 	if m.Width-4 < maxWidth {
 		maxWidth = m.Width - 4
@@ -540,7 +520,6 @@ func (m *GitHubModel) renderErrorView() string {
 		descStyle.Render("Press 'r' to retry or 'esc' to go back"),
 	)
 
-	// Center the main content in available space
 	contentContainer := lipgloss.NewStyle().
 		Width(m.Width).
 		Height(availableHeight).
@@ -548,10 +527,8 @@ func (m *GitHubModel) renderErrorView() string {
 
 	centeredContent := contentContainer.Render(containerStyle.Render(content))
 
-	// Footer
 	navigation := widgets.Footer{Palette: pal, Width: m.Width, Hints: []widgets.KeyHint{{Key: "r", Desc: "retry"}, {Key: "esc", Desc: "back"}}}.View()
 
-	// Combine content with navigation at bottom
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
 		centeredContent,
@@ -561,7 +538,6 @@ func (m *GitHubModel) renderErrorView() string {
 
 func (m *GitHubModel) renderIssuesView() string {
 	pal := theme.DefaultDarkPalette()
-	// Add repository info to header
 	repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
 	header := widgets.Header{Palette: pal, Width: m.Width, Title: "GitHub Issues", Right: repoInfo}.View()
 	footer := widgets.Footer{Palette: pal, Width: m.Width, Hints: []widgets.KeyHint{
@@ -643,7 +619,6 @@ func (m *GitHubModel) convertIssueToNote(issue GitHubIssue) tea.Cmd {
 			}
 		}
 
-		// Open the created note file in the configured editor (Neovim)
 		return OpenEditorMsg{
 			FilePath:   filePath,
 			IssueTitle: issue.IssueTitle,
@@ -651,7 +626,6 @@ func (m *GitHubModel) convertIssueToNote(issue GitHubIssue) tea.Cmd {
 	}
 }
 
-// Message type for opening editor
 type OpenEditorMsg struct {
 	FilePath   string
 	IssueTitle string
@@ -667,7 +641,6 @@ func (m *GitHubModel) openFileInEditor(filePath, issueTitle string) tea.Cmd {
 				Error:  fmt.Errorf("failed to open editor: %w", err),
 			}
 		}
-		// Return success message after editor closes
 		return GitHubSyncMsg{
 			Issues: m.Issues,
 			Error:  nil,
@@ -676,5 +649,5 @@ func (m *GitHubModel) openFileInEditor(filePath, issueTitle string) tea.Cmd {
 }
 
 func (m *GitHubModel) GetCurrentPage() enums.Page {
-	return enums.Page(10) // Use a new page enum for GitHub
+	return enums.Page(10) 
 }

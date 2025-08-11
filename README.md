@@ -39,6 +39,24 @@ Run this command to ensure Toney is setup perfectly.
   toney init
 ```
 
+In order to use the GitHub integration, you need to create a GitHub Personal Access Token [here](https://github.com/settings/tokens/new?scopes=repo&description=Toney+GitHub+Integration).
+In the `Toney` configuration file, set the following:
+```
+[github]
+enabled = true
+token = "your-token-here"
+owner = "your-github-username"
+repo = "your-github-repo"
+```
+In order to use toney to set up the GitHub integration, you need to run the following command:
+```
+  toney github setup
+``` 
+In order to check if the GitHub integration is working, you can run:
+```
+  toney github sync
+```
+
 
 ### ✅ Verify Installation
 

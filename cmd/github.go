@@ -57,27 +57,24 @@ func setupGitHub() error {
 	fmt.Println("🔧 GitHub Integration Setup")
 	fmt.Println("===========================")
 
-	// Load current config
 	if err := config.SetConfig(); err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 
-	// Get GitHub token
 	fmt.Print("Enter your GitHub Personal Access Token: ")
 	tokenBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		return fmt.Errorf("failed to read token: %w", err)
 	}
 	token := strings.TrimSpace(string(tokenBytes))
-	fmt.Println() // New line after password input
+	fmt.Println() 
 
 	if token == "" {
 		return fmt.Errorf("GitHub token is required")
 	}
 
-	// Get repository owner
 	fmt.Print("Enter repository owner (username or organization): ")
 	owner, err := reader.ReadString('\n')
 	if err != nil {
@@ -89,7 +86,6 @@ func setupGitHub() error {
 		return fmt.Errorf("repository owner is required")
 	}
 
-	// Get repository name
 	fmt.Print("Enter repository name: ")
 	repo, err := reader.ReadString('\n')
 	if err != nil {
@@ -101,13 +97,11 @@ func setupGitHub() error {
 		return fmt.Errorf("repository name is required")
 	}
 
-	// Update configuration
 	viper.Set("github.enabled", true)
 	viper.Set("github.token", token)
 	viper.Set("github.owner", owner)
 	viper.Set("github.repo", repo)
 
-	// Write configuration
 	if err := viper.WriteConfig(); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)
 	}
@@ -121,7 +115,6 @@ func setupGitHub() error {
 }
 
 func syncGitHubIssues() error {
-	// Load config
 	if err := config.SetConfig(); err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
@@ -138,7 +131,6 @@ func syncGitHubIssues() error {
 		config.AppConfig.GitHub.Owner,
 		config.AppConfig.GitHub.Repo)
 
-	// Use GitHub API to fetch issues
 	api := github.NewGitHubAPI()
 	issues, err := api.FetchIssues()
 	if err != nil {
@@ -147,7 +139,6 @@ func syncGitHubIssues() error {
 
 	fmt.Printf("📥 Found %d issues\n", len(issues))
 
-	// Convert issues to notes
 	converter := github.NewNoteConverter()
 	successCount := 0
 
@@ -167,7 +158,6 @@ func syncGitHubIssues() error {
 }
 
 func showGitHubStatus() {
-	// Load config
 	if err := config.SetConfig(); err != nil {
 		fmt.Printf("Error loading config: %v\n", err)
 		return
