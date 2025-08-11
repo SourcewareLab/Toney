@@ -27,7 +27,7 @@ type GitHubModel struct {
 	Focused       bool
 	sortBy        string // "title" | "updated"
 	showHelp      bool
-	showingIssue  bool // true when showing issue overlay
+	showingIssue  bool         // true when showing issue overlay
 	selectedIssue *GitHubIssue // issue being viewed in overlay
 }
 
@@ -87,7 +87,7 @@ func (d issueDelegate) Render(w io.Writer, m list.Model, index int, listItem lis
 	if len(title) > maxTitleWidth {
 		title = title[:maxTitleWidth-3] + "..."
 	}
-	
+
 	updated := timeAgo(issue.UpdatedAt)
 	titleStyle := lipgloss.NewStyle().Foreground(colors.Text)
 	if selected {
@@ -97,7 +97,7 @@ func (d issueDelegate) Render(w io.Writer, m list.Model, index int, listItem lis
 	if selected {
 		rightStyle = rightStyle.Foreground(colors.MenuSelectedText)
 	}
-	
+
 	// Space-fill to align right timestamp
 	totalW := m.Width()
 	left := titleStyle.Render(title)
@@ -114,12 +114,12 @@ func (d issueDelegate) Render(w io.Writer, m list.Model, index int, listItem lis
 	if len(desc) > maxDescWidth {
 		desc = desc[:maxDescWidth-3] + "..."
 	}
-	
+
 	descStyle := lipgloss.NewStyle().Foreground(colors.Text)
 	if selected {
 		descStyle = descStyle.Foreground(colors.MenuSelectedText)
 	}
-	
+
 	infoRow := descStyle.Render(desc)
 	line := lipgloss.JoinVertical(lipgloss.Left, titleRow, infoRow)
 	_, _ = io.WriteString(w, line)
@@ -272,8 +272,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Issues = msg.Issues
 		m.Error = ""
 		m.applyListItems()
-
-
 
 	case tea.KeyMsg:
 		if !m.Focused {
@@ -511,55 +509,55 @@ func (m *GitHubModel) renderErrorView() string {
 }
 
 func (m *GitHubModel) renderIssuesView() string {
-    repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
-    
-    // Since we only fetch open issues from API, all issues are open
-    summaryText := fmt.Sprintf("GitHub Issues - %s\n%d open issues", repoInfo, len(m.Issues))
-    summary := lipgloss.NewStyle().
-        Foreground(colors.ColorPalette().Text).
-        Width(m.Width).
-        Height(m.Height/3).
-        Align(lipgloss.Center, lipgloss.Center).
-        Render(summaryText)
-    
-    listArea := lipgloss.Place(m.Width, 2*m.Height/3, lipgloss.Center, lipgloss.Center, m.List.View())
+	repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
 
-    if len(m.List.Items()) == 0 {
-        listArea = lipgloss.Place(m.Width, 2*m.Height/3, lipgloss.Center, lipgloss.Top,
-            lipgloss.NewStyle().Foreground(colors.ColorPalette().Text).Render("No open issues found!"))
-    }
+	// Since we only fetch open issues from API, all issues are open
+	summaryText := fmt.Sprintf("GitHub Issues - %s\n%d open issues", repoInfo, len(m.Issues))
+	summary := lipgloss.NewStyle().
+		Foreground(colors.ColorPalette().Text).
+		Width(m.Width).
+		Height(m.Height/3).
+		Align(lipgloss.Center, lipgloss.Center).
+		Render(summaryText)
 
-    main := lipgloss.JoinVertical(lipgloss.Left, summary, listArea)
-    help := lipgloss.NewStyle().
-        Foreground(colors.ColorPalette().Text).
-        PaddingLeft(2).
-        Render("r: refresh • enter: view details • s: sort • esc: back")
+	listArea := lipgloss.Place(m.Width, 2*m.Height/3, lipgloss.Center, lipgloss.Center, m.List.View())
 
-    return lipgloss.JoinVertical(lipgloss.Left, main, help)
+	if len(m.List.Items()) == 0 {
+		listArea = lipgloss.Place(m.Width, 2*m.Height/3, lipgloss.Center, lipgloss.Top,
+			lipgloss.NewStyle().Foreground(colors.ColorPalette().Text).Render("No open issues found!"))
+	}
+
+	main := lipgloss.JoinVertical(lipgloss.Left, summary, listArea)
+	help := lipgloss.NewStyle().
+		Foreground(colors.ColorPalette().Text).
+		PaddingLeft(2).
+		Render("r: refresh • enter: view details • s: sort • esc: back")
+
+	return lipgloss.JoinVertical(lipgloss.Left, main, help)
 }
 
 func (m *GitHubModel) renderIssueOverlay() string {
 	colors := colors.ColorPalette()
 	issue := m.selectedIssue
-	
+
 	// Create overlay content
 	title := fmt.Sprintf("#%d %s", issue.Number, issue.IssueTitle)
-	
+
 	// Wrap long titles
 	titleStyle := lipgloss.NewStyle().
 		Foreground(colors.Text).
 		Bold(true).
 		Width(m.Width - 8).
 		Align(lipgloss.Left)
-	
+
 	// Author and state info
-	infoText := fmt.Sprintf("Author: %s | State: %s | Updated: %s", 
+	infoText := fmt.Sprintf("Author: %s | State: %s | Updated: %s",
 		issue.Author, strings.ToUpper(issue.State), timeAgo(issue.UpdatedAt))
 	infoStyle := lipgloss.NewStyle().
 		Foreground(colors.Text).
 		Width(m.Width - 8).
 		Align(lipgloss.Left)
-	
+
 	// Labels if any
 	labelsText := ""
 	if len(issue.Labels) > 0 {
@@ -569,21 +567,21 @@ func (m *GitHubModel) renderIssueOverlay() string {
 		}
 		labelsText = "Labels: " + strings.Join(labelNames, ", ")
 	}
-	
+
 	// Compose content starting with title and info
 	content := lipgloss.JoinVertical(lipgloss.Left,
 		titleStyle.Render(title),
 		"",
 		infoStyle.Render(infoText),
 	)
-	
+
 	if labelsText != "" {
 		content = lipgloss.JoinVertical(lipgloss.Left,
 			content,
 			infoStyle.Render(labelsText),
 		)
 	}
-	
+
 	// Add description section with prominent styling if body exists
 	if issue.Body != "" {
 		// Description header
@@ -592,17 +590,17 @@ func (m *GitHubModel) renderIssueOverlay() string {
 			Bold(true).
 			Width(m.Width - 8).
 			Align(lipgloss.Left)
-		
+
 		// Description body with better visibility
 		bodyStyle := lipgloss.NewStyle().
 			Foreground(colors.Text).
-			Width(m.Width - 8).
+			Width(m.Width-8).
 			Align(lipgloss.Left).
 			Border(lipgloss.NormalBorder(), false, false, false, true).
 			BorderForeground(colors.Border).
 			PaddingLeft(2).
 			MarginTop(1)
-		
+
 		content = lipgloss.JoinVertical(lipgloss.Left,
 			content,
 			"",
@@ -610,7 +608,7 @@ func (m *GitHubModel) renderIssueOverlay() string {
 			bodyStyle.Render(issue.Body),
 		)
 	}
-	
+
 	// Create bordered overlay
 	overlay := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
@@ -619,7 +617,7 @@ func (m *GitHubModel) renderIssueOverlay() string {
 		Width(m.Width - 4).
 		Height(m.Height - 6).
 		Render(content)
-	
+
 	// Help text
 	helpText := "Press ESC to close"
 	help := lipgloss.NewStyle().
@@ -628,10 +626,10 @@ func (m *GitHubModel) renderIssueOverlay() string {
 		Align(lipgloss.Center).
 		PaddingLeft(2).
 		Render(helpText)
-	
+
 	// Center the overlay on screen
 	centeredOverlay := lipgloss.Place(m.Width, m.Height-2, lipgloss.Center, lipgloss.Center, overlay)
-	
+
 	return lipgloss.JoinVertical(lipgloss.Left, centeredOverlay, help)
 }
 
@@ -655,8 +653,6 @@ func (m *GitHubModel) SyncIssues() tea.Cmd {
 		}
 	}
 }
-
-
 
 func (m *GitHubModel) GetCurrentPage() enums.Page {
 	return enums.Page(10)
