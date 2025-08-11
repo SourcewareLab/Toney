@@ -369,7 +369,7 @@ func (m *GitHubModel) applyListItems() {
 		sort.Slice(filtered, func(i, j int) bool {
 			return filtered[i].UpdatedAt > filtered[j].UpdatedAt
 		})
-	default: 
+	default:
 		sort.Slice(filtered, func(i, j int) bool {
 			return strings.ToLower(filtered[i].IssueTitle) < strings.ToLower(filtered[j].IssueTitle)
 		})
@@ -484,7 +484,7 @@ func (m *GitHubModel) renderLoadingView() string {
 func (m *GitHubModel) renderErrorView() string {
 	pal := theme.DefaultDarkPalette()
 	// Calculate responsive dimensions
-	availableHeight := m.Height - 3 
+	availableHeight := m.Height - 3
 
 	maxWidth := 80
 	if m.Width-4 < maxWidth {
@@ -649,5 +649,5 @@ func (m *GitHubModel) openFileInEditor(filePath, issueTitle string) tea.Cmd {
 }
 
 func (m *GitHubModel) GetCurrentPage() enums.Page {
-	return enums.Page(10) 
+	return enums.Page(10)
 }

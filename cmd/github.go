@@ -69,7 +69,7 @@ func setupGitHub() error {
 		return fmt.Errorf("failed to read token: %w", err)
 	}
 	token := strings.TrimSpace(string(tokenBytes))
-	fmt.Println() 
+	fmt.Println()
 
 	if token == "" {
 		return fmt.Errorf("GitHub token is required")
