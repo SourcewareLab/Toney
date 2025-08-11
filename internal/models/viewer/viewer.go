@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
-	"github.com/SourcewareLab/Toney/internal/styles"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -30,17 +30,17 @@ type Viewer struct {
 func NewViewer(w int, h int) *Viewer {
 	vp := viewport.New(w*3/4, h)
 	vp.YOffset = 0
-	pal := styles.DefaultDarkPalette()
+	pal := colors.ColorPalette()
 	vp.Style = lipgloss.NewStyle().
 		Align(lipgloss.Center, lipgloss.Center).
-		BorderStyle(styles.Borders()).
+		BorderStyle(lipgloss.RoundedBorder()).
 		MarginTop(0).
 		Padding(1, 1).
 		BorderForeground(pal.Border).
-		Foreground(pal.Fg)
+		Foreground(pal.Text)
 	vp.SetContent(
 		lipgloss.Place(w*3/4, h-2, lipgloss.Center, lipgloss.Center,
-			lipgloss.NewStyle().Foreground(pal.Muted).Render("Select a file to view its contents"),
+			lipgloss.NewStyle().Foreground(pal.Text).Render("Select a file to view its contents"),
 		))
 
 	r, _ := glamour.NewTermRenderer(glamour.WithStyles(config.ToGlamourStyle(config.AppConfig.Styles.Renderer)),
@@ -94,29 +94,31 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Viewer) View() string {
-	pal := styles.DefaultDarkPalette()
+	pal := colors.ColorPalette()
 	if m.IsFocused {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.Accent)
+		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.FocusedBorder)
 	} else {
 		m.Viewport.Style = m.Viewport.Style.BorderForeground(pal.Border)
 	}
-
-	header := styles.Header{Palette: pal, Width: m.Width, Title: "Viewer", Right: m.Path}.View()
-	footer := styles.Footer{Palette: pal, Width: m.Width, Hints: []styles.KeyHint{{Key: "esc", Desc: "back"}}}.View()
-	// Ensure viewport height fits between header and footer
-	bodyH := m.Height - lipgloss.Height(header) - lipgloss.Height(footer)
+	// Simple help line at the bottom, no header/footer widgets
+	help := lipgloss.NewStyle().
+		Foreground(pal.Text).
+		PaddingLeft(2).
+		Render("esc: back")
+	// Ensure viewport height fits above help line
+	bodyH := m.Height - lipgloss.Height(help)
 	if bodyH < 3 {
 		bodyH = 3
 	}
 	m.Viewport.Width = m.Width
 	m.Viewport.Height = bodyH
 	box := lipgloss.NewStyle().
-		Border(styles.Borders()).
+		Border(lipgloss.RoundedBorder()).
 		BorderForeground(pal.Border).
 		Width(m.Width).
 		Height(bodyH).
 		Padding(0, 0)
-	return lipgloss.JoinVertical(lipgloss.Left, header, box.Render(m.Viewport.View()), footer)
+	return lipgloss.JoinVertical(lipgloss.Left, box.Render(m.Viewport.View()), help)
 }
 
 func (m *Viewer) Header() string {

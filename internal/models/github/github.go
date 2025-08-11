@@ -11,7 +11,6 @@ import (
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	"github.com/SourcewareLab/Toney/internal/messages"
-	"github.com/SourcewareLab/Toney/internal/styles"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -25,8 +24,7 @@ type GitHubModel struct {
 	Loading       bool
 	Error         string
 	Focused       bool
-	sortBy        string // "title" | "updated"
-	showHelp      bool
+	sortBy        string       // "title" | "updated"
 	showingIssue  bool         // true when showing issue overlay
 	selectedIssue *GitHubIssue // issue being viewed in overlay
 }
@@ -48,25 +46,6 @@ type Label struct {
 	Color string `json:"color"`
 }
 
-// renderHelpView shows an overlay-style help screen with keybindings
-func (m *GitHubModel) renderHelpView() string {
-	pal := styles.DefaultDarkPalette()
-	header := styles.Header{Palette: pal, Width: m.Width, Title: "GitHub · Help", Right: "? to close"}.View()
-	overlay := styles.HelpOverlay{
-		Palette: pal,
-		Width:   m.Width,
-		Height:  m.Height - lipgloss.Height(header) - 1,
-		Title:   "Keybindings",
-		Sections: []styles.HelpSection{
-			{Title: "Navigation", Rows: []string{"↑/↓: Move selection", "enter/c: Convert to note", "esc: Back"}},
-			{Title: "Actions", Rows: []string{"r: Refresh", "f: Cycle filter (all/open/closed)", "s: Toggle sort (title/updated)", "?: Toggle help"}},
-		},
-	}.View()
-	footer := styles.Footer{Palette: pal, Width: m.Width, Hints: []styles.KeyHint{{Key: "?", Desc: "close"}, {Key: "esc", Desc: "back"}}}.View()
-	return lipgloss.JoinVertical(lipgloss.Left, header, overlay, footer)
-}
-
-// issueDelegate renders GitHub issues with status and label chips.
 type issueDelegate struct{}
 
 func (d issueDelegate) Height() int                               { return 2 }
@@ -125,7 +104,6 @@ func (d issueDelegate) Render(w io.Writer, m list.Model, index int, listItem lis
 	_, _ = io.WriteString(w, line)
 }
 
-// timeAgo returns a short relative time like "2h", "3d" given an ISO8601 timestamp.
 func timeAgo(ts string) string {
 	if ts == "" {
 		return ""
@@ -162,7 +140,6 @@ func timeAgo(ts string) string {
 	return fmt.Sprintf("%dy", int(d.Hours()/(24*365)))
 }
 
-// Implement list.Item interface for GitHubIssue
 func (i GitHubIssue) FilterValue() string {
 	return i.IssueTitle
 }
@@ -231,7 +208,6 @@ func NewGitHubModel(w int, h int) *GitHubModel {
 		Issues:        []GitHubIssue{},
 		Focused:       true,
 		sortBy:        "title",
-		showHelp:      false,
 		showingIssue:  false,
 		selectedIssue: nil,
 	}
@@ -279,9 +255,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch msg.String() {
-		case "?":
-			m.showHelp = !m.showHelp
-			return m, nil
 		case "r", "ctrl+r":
 			m.Loading = true
 			m.Error = ""
@@ -325,7 +298,6 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// applyListItems sorts and loads issues into the list
 func (m *GitHubModel) applyListItems() {
 	// Since we only fetch open issues from API, no filtering needed
 	issues := make([]GitHubIssue, len(m.Issues))
@@ -364,38 +336,37 @@ func (m *GitHubModel) View() string {
 		return m.renderErrorView()
 	}
 
-	if m.showHelp {
-		return m.renderHelpView()
-	}
-
 	if m.showingIssue && m.selectedIssue != nil {
 		return m.renderIssueOverlay()
 	}
-
+	if m.showingIssue && m.selectedIssue != nil {
+		return m.renderIssueOverlay()
+	}
 	return m.renderIssuesView()
 }
 
 func (m *GitHubModel) renderDisabledView() string {
-	pal := styles.DefaultDarkPalette()
-	header := styles.Header{Palette: pal, Width: m.Width, Title: "GitHub", Right: "disabled"}.View()
+	pal := colors.ColorPalette()
 	box := lipgloss.NewStyle().
-		Border(styles.Borders()).
+		Border(lipgloss.RoundedBorder()).
 		BorderForeground(pal.Border).
 		Padding(1, 2).
 		Width(m.Width)
 	content := lipgloss.NewStyle().
-		Foreground(pal.Fg).
+		Foreground(pal.Text).
 		Render("GitHub integration is disabled.\n\nRun 'toney github setup' to enable it.")
-	footer := styles.Footer{Palette: pal, Width: m.Width, Hints: []styles.KeyHint{{Key: "esc", Desc: "back"}}}.View()
+	help := lipgloss.NewStyle().
+		Foreground(pal.Text).
+		PaddingLeft(2).
+		Render("esc: back")
 	return lipgloss.JoinVertical(lipgloss.Left,
-		header,
 		box.Render(content),
-		footer,
+		help,
 	)
 }
 
 func (m *GitHubModel) renderLoadingView() string {
-	pal := styles.DefaultDarkPalette()
+	pal := colors.ColorPalette()
 	repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
 
 	// Helper function for responsive width
@@ -404,27 +375,26 @@ func (m *GitHubModel) renderLoadingView() string {
 		maxWidth = m.Width - 4
 	}
 
-	header := styles.Header{Palette: pal, Width: m.Width, Title: "GitHub · Loading", Right: ""}.View()
 	containerStyle := lipgloss.NewStyle().
 		Width(maxWidth).
 		Height(10).
 		Padding(1, 2).
 		Align(lipgloss.Center, lipgloss.Center).
-		Border(styles.Borders()).
+		Border(lipgloss.RoundedBorder()).
 		BorderForeground(pal.Border)
 
 	titleStyle := lipgloss.NewStyle().
-		Foreground(pal.Fg).
+		Foreground(pal.Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	loadingStyle := lipgloss.NewStyle().
-		Foreground(pal.Fg).
+		Foreground(pal.Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	descStyle := lipgloss.NewStyle().
-		Foreground(pal.Muted).
+		Foreground(pal.Text).
 		Margin(0, 0, 1, 0)
 
 	content := lipgloss.JoinVertical(
@@ -442,19 +412,21 @@ func (m *GitHubModel) renderLoadingView() string {
 	centeredContent := contentContainer.Render(containerStyle.Render(content))
 
 	// Footer
-	navigation := styles.Footer{Palette: pal, Width: m.Width, Hints: []styles.KeyHint{{Key: "esc", Desc: "back"}}}.View()
+	navigation := lipgloss.NewStyle().
+		Foreground(pal.Text).
+		PaddingLeft(2).
+		Render("esc: back")
 
 	// Combine content with navigation at bottom
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		header,
 		centeredContent,
 		navigation,
 	)
 }
 
 func (m *GitHubModel) renderErrorView() string {
-	pal := styles.DefaultDarkPalette()
+	pal := colors.ColorPalette()
 	// Calculate responsive dimensions
 	availableHeight := m.Height - 3
 
@@ -468,21 +440,21 @@ func (m *GitHubModel) renderErrorView() string {
 		Height(14).
 		Padding(1, 2).
 		Align(lipgloss.Center, lipgloss.Center).
-		Border(styles.Borders()).
+		Border(lipgloss.RoundedBorder()).
 		BorderForeground(pal.Border)
 
 	titleStyle := lipgloss.NewStyle().
-		Foreground(pal.Fg).
+		Foreground(pal.Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	errorStyle := lipgloss.NewStyle().
-		Foreground(pal.Error).
+		Foreground(pal.Text).
 		Bold(true).
 		Margin(0, 0, 1, 0)
 
 	descStyle := lipgloss.NewStyle().
-		Foreground(pal.Muted).
+		Foreground(pal.Text).
 		Margin(0, 0, 1, 0)
 
 	content := lipgloss.JoinVertical(
@@ -499,7 +471,10 @@ func (m *GitHubModel) renderErrorView() string {
 
 	centeredContent := contentContainer.Render(containerStyle.Render(content))
 
-	navigation := styles.Footer{Palette: pal, Width: m.Width, Hints: []styles.KeyHint{{Key: "r", Desc: "retry"}, {Key: "esc", Desc: "back"}}}.View()
+	navigation := lipgloss.NewStyle().
+		Foreground(pal.Text).
+		PaddingLeft(2).
+		Render("r: retry • esc: back")
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,

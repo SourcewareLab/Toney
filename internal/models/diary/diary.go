@@ -12,6 +12,7 @@ import (
 	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
 	"github.com/SourcewareLab/Toney/internal/models/fzf"
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/styles"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -43,11 +44,11 @@ func NewDiary(w int, h int) *Diary {
 		glamour.WithWordWrap(w))
 	content, _ := r.Render(ReadDiary(dirpath, today))
 
-	pal := styles.DefaultDarkPalette()
+	pal := colors.ColorPalette()
 	vp := viewport.New(w, h-1)
 	vp.Style = styles.BorderStyle().
 		BorderForeground(pal.Border).
-		Foreground(pal.Fg)
+		Foreground(pal.Text)
 	vp.SetContent(content)
 
 	files, _ := AllFiles(dirpath)
