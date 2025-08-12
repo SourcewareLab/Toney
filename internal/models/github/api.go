@@ -128,12 +128,6 @@ func (api *GitHubAPI) FetchAllIssuesForUser() ([]GitHubIssue, error) {
 		return nil, fmt.Errorf("failed to parse repos JSON: %w", err)
 	}
 
-	// Note: We intentionally fetch all open issues across repositories.
-	// "since" filtering based on last_sync can hide existing issues that
-	// haven't been updated recently. We therefore do not apply a "since"
-	// query parameter here. We still update last_sync after a successful
-	// fetch to allow future incremental strategies if desired.
-
 	// Bounded parallel fetching of repo issues
 	workerCount := 8
 	if len(repos) < workerCount {
@@ -194,17 +188,17 @@ func (api *GitHubAPI) FetchAllIssuesForUser() ([]GitHubIssue, error) {
 						}
 					}
 					batch = append(batch, GitHubIssue{
-						Number:     apiIssue.Number,
-						IssueTitle: apiIssue.Title,
-						Body:       apiIssue.Body,
-						State:      apiIssue.State,
-						Author:     apiIssue.User.Login,
-						Labels:     convertLabels(apiIssue.Labels),
-						CreatedAt:  apiIssue.CreatedAt,
-						UpdatedAt:  apiIssue.UpdatedAt,
-						HTMLURL:    apiIssue.HTMLURL,
-						Repo:       fmt.Sprintf("%s/%s", r.Owner.Login, r.Name),
-						Assignees:  assignees,
+						Number:       apiIssue.Number,
+						IssueTitle:   apiIssue.Title,
+						Body:         apiIssue.Body,
+						State:        apiIssue.State,
+						Author:       apiIssue.User.Login,
+						Labels:       convertLabels(apiIssue.Labels),
+						CreatedAt:    apiIssue.CreatedAt,
+						UpdatedAt:    apiIssue.UpdatedAt,
+						HTMLURL:      apiIssue.HTMLURL,
+						Repo:         fmt.Sprintf("%s/%s", r.Owner.Login, r.Name),
+						Assignees:    assignees,
 						AssignedToMe: assignedToMe,
 					})
 				}

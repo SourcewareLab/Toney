@@ -103,14 +103,14 @@ func syncGitHubIssues() error {
 		return fmt.Errorf("GitHub token not configured. Run 'toney github setup' first")
 	}
 
-    // Sync across all repositories
-    fmt.Printf("🔄 Syncing issues from all repositories...\n")
+	// Sync across all repositories
+	fmt.Printf("🔄 Syncing issues from all repositories...\n")
 
-    api := github.NewGitHubAPI()
-    issues, err := api.FetchIssues()
-    if err != nil {
-        return fmt.Errorf("failed to fetch issues: %w", err)
-    }
+	api := github.NewGitHubAPI()
+	issues, err := api.FetchIssues()
+	if err != nil {
+		return fmt.Errorf("failed to fetch issues: %w", err)
+	}
 
 	fmt.Printf("📥 Found %d issues\n", len(issues))
 

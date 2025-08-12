@@ -33,18 +33,18 @@ type GitHubModel struct {
 }
 
 type GitHubIssue struct {
-	Number     int     `json:"number"`
-	IssueTitle string  `json:"title"`
-	Body       string  `json:"body"`
-	State      string  `json:"state"`
-	Author     string  `json:"user"`
-	Labels     []Label `json:"labels"`
-	CreatedAt  string  `json:"created_at"`
-	UpdatedAt  string  `json:"updated_at"`
-	HTMLURL    string  `json:"html_url"`
-	Repo       string  `json:"-"`
-	Assignees  []string `json:"-"`
-	AssignedToMe bool   `json:"-"`
+	Number       int      `json:"number"`
+	IssueTitle   string   `json:"title"`
+	Body         string   `json:"body"`
+	State        string   `json:"state"`
+	Author       string   `json:"user"`
+	Labels       []Label  `json:"labels"`
+	CreatedAt    string   `json:"created_at"`
+	UpdatedAt    string   `json:"updated_at"`
+	HTMLURL      string   `json:"html_url"`
+	Repo         string   `json:"-"`
+	Assignees    []string `json:"-"`
+	AssignedToMe bool     `json:"-"`
 }
 
 type Label struct {
@@ -53,8 +53,8 @@ type Label struct {
 }
 
 type keyMap struct {
-	Retry key.Binding
-	Back  key.Binding
+	Retry          key.Binding
+	Back           key.Binding
 	ToggleAssigned key.Binding
 }
 

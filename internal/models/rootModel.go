@@ -33,7 +33,7 @@ type RootModel struct {
 	Menu           *menu.Menu
 	Daily          *daily.Daily
 	Diary          *diary.Diary
-  GitHub        *github.GitHubModel
+	GitHub         *github.GitHubModel
 	ErrorPopup     *errorpopup.ErrorPopup
 	Overlay        *overlay.Model
 	CurrentPage    enums.Page

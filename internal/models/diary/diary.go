@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	"github.com/SourcewareLab/Toney/internal/keymap"
 	"github.com/SourcewareLab/Toney/internal/messages"
 	"github.com/SourcewareLab/Toney/internal/models/fzf"
-	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/styles"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
