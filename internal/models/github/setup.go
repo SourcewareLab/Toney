@@ -83,7 +83,6 @@ func (m *GitHubSetupModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "tab", "shift+tab":
-			// Only one input; ignore navigation
 			return m, nil
 		}
 	}
@@ -237,9 +236,6 @@ func (m *GitHubSetupModel) saveConfiguration() tea.Cmd {
 		// Save to configuration
 		viper.Set("github.enabled", true)
 		viper.Set("github.token", token)
-		// Clear owner/repo to indicate all-repos scope
-		viper.Set("github.owner", "")
-		viper.Set("github.repo", "")
 
 		if err := viper.WriteConfig(); err != nil {
 			return GitHubSetupCompleteMsg{

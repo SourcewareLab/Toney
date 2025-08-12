@@ -16,8 +16,7 @@ type GeneralConfig struct {
 }
 
 type GitHubConfig struct {
-	Enabled bool   `mapstructure:"enabled"`
-	Token   string `mapstructure:"token"`
-	Owner   string `mapstructure:"owner"`
-	Repo    string `mapstructure:"repo"`
+	Enabled  bool   `mapstructure:"enabled"`
+	Token    string `mapstructure:"token"`
+	LastSync string `mapstructure:"last_sync"`
 }

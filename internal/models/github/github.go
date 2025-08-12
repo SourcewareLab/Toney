@@ -11,6 +11,8 @@ import (
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	"github.com/SourcewareLab/Toney/internal/messages"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -27,6 +29,7 @@ type GitHubModel struct {
 	sortBy        string       // "title" | "updated"
 	showingIssue  bool         // true when showing issue overlay
 	selectedIssue *GitHubIssue // issue being viewed in overlay
+	showAssigned  bool         // filter: show only issues assigned to me
 }
 
 type GitHubIssue struct {
@@ -40,11 +43,34 @@ type GitHubIssue struct {
 	UpdatedAt  string  `json:"updated_at"`
 	HTMLURL    string  `json:"html_url"`
 	Repo       string  `json:"-"`
+	Assignees  []string `json:"-"`
+	AssignedToMe bool   `json:"-"`
 }
 
 type Label struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`
+}
+
+type keyMap struct {
+	Retry key.Binding
+	Back  key.Binding
+	ToggleAssigned key.Binding
+}
+
+var keys = keyMap{
+	Retry: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "retry"),
+	),
+	Back: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "back"),
+	),
+	ToggleAssigned: key.NewBinding(
+		key.WithKeys("a"),
+		key.WithHelp("a", "assigned only"),
+	),
 }
 
 type issueDelegate struct{}
@@ -213,6 +239,7 @@ func NewGitHubModel(w int, h int) *GitHubModel {
 		sortBy:        "title",
 		showingIssue:  false,
 		selectedIssue: nil,
+		showAssigned:  false,
 	}
 }
 
@@ -278,6 +305,10 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.applyListItems()
 			return m, nil
+		case "a":
+			m.showAssigned = !m.showAssigned
+			m.applyListItems()
+			return m, nil
 		case "esc":
 			if m.showingIssue {
 				m.showingIssue = false
@@ -300,9 +331,19 @@ func (m *GitHubModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *GitHubModel) applyListItems() {
-	// Since we only fetch open issues from API, no filtering needed
-	issues := make([]GitHubIssue, len(m.Issues))
-	copy(issues, m.Issues)
+	base := make([]GitHubIssue, len(m.Issues))
+	copy(base, m.Issues)
+
+	issues := base
+	if m.showAssigned {
+		filtered := make([]GitHubIssue, 0, len(base))
+		for _, is := range base {
+			if is.AssignedToMe {
+				filtered = append(filtered, is)
+			}
+		}
+		issues = filtered
+	}
 
 	// Sort
 	switch m.sortBy {
@@ -343,6 +384,7 @@ func (m *GitHubModel) View() string {
 }
 
 func (m *GitHubModel) renderDisabledView() string {
+	h := help.New()
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(colors.ColorPalette().Border).
@@ -354,7 +396,7 @@ func (m *GitHubModel) renderDisabledView() string {
 	help := lipgloss.NewStyle().
 		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
-		Render("esc: back")
+		Render(h.ShortHelpView([]key.Binding{keys.Back}))
 	return lipgloss.JoinVertical(lipgloss.Left,
 		box.Render(content),
 		help,
@@ -407,10 +449,11 @@ func (m *GitHubModel) renderLoadingView() string {
 	centeredContent := contentContainer.Render(containerStyle.Render(content))
 
 	// Footer
+	h := help.New()
 	navigation := lipgloss.NewStyle().
 		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
-		Render("esc: back")
+		Render(h.ShortHelpView([]key.Binding{keys.Back}))
 
 	// Combine content with navigation at bottom
 	return lipgloss.JoinVertical(
@@ -451,11 +494,12 @@ func (m *GitHubModel) renderErrorView() string {
 		Foreground(colors.ColorPalette().Text).
 		Margin(0, 0, 1, 0)
 
+	h := help.New()
 	content := lipgloss.JoinVertical(
 		lipgloss.Center,
 		titleStyle.Render(" Error"),
 		errorStyle.Render(m.Error),
-		descStyle.Render("Press 'r' to retry or 'esc' to go back"),
+		descStyle.Render(h.ShortHelpView([]key.Binding{keys.Retry, keys.Back})),
 	)
 
 	contentContainer := lipgloss.NewStyle().
@@ -468,7 +512,7 @@ func (m *GitHubModel) renderErrorView() string {
 	navigation := lipgloss.NewStyle().
 		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
-		Render("r: retry • esc: back")
+		Render(h.ShortHelpView([]key.Binding{keys.Retry, keys.Back}))
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
@@ -478,10 +522,16 @@ func (m *GitHubModel) renderErrorView() string {
 }
 
 func (m *GitHubModel) renderIssuesView() string {
-	repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
+	repoInfo := "All repositories"
 
 	// Since we only fetch open issues from API, all issues are open
-	summaryText := fmt.Sprintf("GitHub Issues - %s\n%d open issues", repoInfo, len(m.Issues))
+	shownCount := len(m.List.Items())
+	total := len(m.Issues)
+	mode := "all"
+	if m.showAssigned {
+		mode = "assigned"
+	}
+	summaryText := fmt.Sprintf("GitHub Issues - %s (%s)\n%d shown / %d total", repoInfo, mode, shownCount, total)
 	summary := lipgloss.NewStyle().
 		Foreground(colors.ColorPalette().Text).
 		Width(m.Width).
@@ -496,11 +546,12 @@ func (m *GitHubModel) renderIssuesView() string {
 			lipgloss.NewStyle().Foreground(colors.ColorPalette().Text).Render("No open issues found!"))
 	}
 
+	h := help.New()
 	main := lipgloss.JoinVertical(lipgloss.Left, summary, listArea)
 	help := lipgloss.NewStyle().
 		Foreground(colors.ColorPalette().Text).
 		PaddingLeft(2).
-		Render("r: refresh • enter: view details • s: sort • esc: back")
+		Render(h.ShortHelpView([]key.Binding{keys.Retry, keys.ToggleAssigned, keys.Back}))
 
 	return lipgloss.JoinVertical(lipgloss.Left, main, help)
 }
