@@ -15,7 +15,7 @@ type GitHubSetupModel struct {
 	Width   int
 	Height  int
 	Focused bool
-	Step    int // 0: token, 1: owner, 2: repo, 3: confirmation
+	Step    int // 0: token, 1: confirmation
 	Inputs  []textinput.Model
 	Error   string
 	Success bool
@@ -27,7 +27,7 @@ type GitHubSetupCompleteMsg struct {
 }
 
 func NewGitHubSetupModel() *GitHubSetupModel {
-	inputs := make([]textinput.Model, 3)
+	inputs := make([]textinput.Model, 1)
 
 	// Token input
 	inputs[0] = textinput.New()
@@ -35,14 +35,6 @@ func NewGitHubSetupModel() *GitHubSetupModel {
 	inputs[0].Focus()
 	inputs[0].EchoMode = textinput.EchoPassword
 	inputs[0].EchoCharacter = '*'
-
-	// Owner input
-	inputs[1] = textinput.New()
-	inputs[1].Placeholder = "Enter repository owner (username or organization)"
-
-	// Repo input
-	inputs[2] = textinput.New()
-	inputs[2].Placeholder = "Enter repository name"
 
 	return &GitHubSetupModel{
 		Step:    0,
@@ -82,14 +74,8 @@ func (m *GitHubSetupModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			if m.Step < 2 {
-				// Move to next step
-				m.Inputs[m.Step].Blur()
-				m.Step++
-				m.Inputs[m.Step].Focus()
-				return m, textinput.Blink
-			} else if m.Step == 2 {
-				// Final step - save configuration
+			if m.Step == 0 {
+				// Save configuration with token only
 				return m, m.saveConfiguration()
 			} else if m.Success {
 				// Setup complete, return to menu
@@ -97,22 +83,13 @@ func (m *GitHubSetupModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "tab", "shift+tab":
-			// Navigate between inputs
-			if m.Step > 0 {
-				m.Inputs[m.Step].Blur()
-				if msg.String() == "tab" {
-					m.Step = (m.Step + 1) % 3
-				} else {
-					m.Step = (m.Step - 1 + 3) % 3
-				}
-				m.Inputs[m.Step].Focus()
-				return m, textinput.Blink
-			}
+			// Only one input; ignore navigation
+			return m, nil
 		}
 	}
 
 	// Update current input
-	if m.Step < 3 && !m.Success {
+	if !m.Success {
 		m.Inputs[m.Step], cmd = m.Inputs[m.Step].Update(msg)
 	}
 
@@ -149,24 +126,10 @@ func (m *GitHubSetupModel) renderSetupView() string {
 
 	content.WriteString(instructions)
 
-	// Step indicators
-	stepStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#6c7086"))
+	// Step indicator (single step)
 	activeStepStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#b4befe")).Bold(true)
-
-	steps := []string{"Token", "Owner", "Repository"}
-	stepIndicators := ""
-	for i, step := range steps {
-		if i == m.Step {
-			stepIndicators += activeStepStyle.Render(fmt.Sprintf("[%d] %s", i+1, step))
-		} else if i < m.Step {
-			stepIndicators += stepStyle.Render(fmt.Sprintf("[✓] %s", step))
-		} else {
-			stepIndicators += stepStyle.Render(fmt.Sprintf("[ ] %s", step))
-		}
-		if i < len(steps)-1 {
-			stepIndicators += "  →  "
-		}
-	}
+	steps := []string{"Token"}
+	stepIndicators := activeStepStyle.Render("[1] " + steps[0])
 	content.WriteString(stepIndicators + "\n\n")
 
 	// Current input
@@ -175,34 +138,19 @@ func (m *GitHubSetupModel) renderSetupView() string {
 		BorderForeground(lipgloss.Color("#45475a")).
 		Padding(1, 2)
 
-	if m.Step < 3 {
-		// Input labels
-		labels := []string{
-			"GitHub Personal Access Token:",
-			"Repository Owner:",
-			"Repository Name:",
-		}
+	// Single input: token
+	content.WriteString(lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#cdd6f4")).
+		Bold(true).
+		Render("GitHub Personal Access Token:") + "\n")
 
-		content.WriteString(lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#cdd6f4")).
-			Bold(true).
-			Render(labels[m.Step]) + "\n")
+	content.WriteString(inputStyle.Render(m.Inputs[0].View()) + "\n\n")
 
-		content.WriteString(inputStyle.Render(m.Inputs[m.Step].View()) + "\n\n")
-
-		// Help text
-		helpTexts := []string{
-			"Create a Personal Access Token at: https://github.com/settings/tokens\nRequired scopes: repo (for private repos) or public_repo (for public repos)",
-			"Enter the username or organization that owns the repository",
-			"Enter the name of the repository you want to sync issues from",
-		}
-
-		helpStyle := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#6c7086")).
-			Italic(true)
-
-		content.WriteString(helpStyle.Render(helpTexts[m.Step]) + "\n\n")
-	}
+	helpStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#6c7086")).
+		Italic(true)
+	content.WriteString(helpStyle.Render(
+		"Create a Personal Access Token at: https://github.com/settings/tokens\nRequired scopes: repo (for private repos) or public_repo (for public repos)") + "\n\n")
 
 	// Navigation help
 	navHelp := lipgloss.NewStyle().
@@ -235,7 +183,7 @@ func (m *GitHubSetupModel) renderSuccessView() string {
 
 	content += lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#cdd6f4")).
-		Render(fmt.Sprintf("Repository: %s/%s\n", m.Inputs[1].Value(), m.Inputs[2].Value())) +
+		Render("Scope: All repositories\n") +
 		"Status: Enabled\n\n" +
 		"The 'GitHub Issues' option will now appear in the main menu.\n" +
 		"You can browse and convert issues to structured notes.\n\n" +
@@ -268,24 +216,17 @@ func (m *GitHubSetupModel) renderErrorView() string {
 func (m *GitHubSetupModel) saveConfiguration() tea.Cmd {
 	return func() tea.Msg {
 		token := strings.TrimSpace(m.Inputs[0].Value())
-		owner := strings.TrimSpace(m.Inputs[1].Value())
-		repo := strings.TrimSpace(m.Inputs[2].Value())
 
-		if token == "" || owner == "" || repo == "" {
+		if token == "" {
 			return GitHubSetupCompleteMsg{
 				Success: false,
-				Error:   fmt.Errorf("all fields are required"),
+				Error:   fmt.Errorf("token is required"),
 			}
 		}
 
-		// Test the credentials by making a simple API call
-		api := &GitHubAPI{
-			token: token,
-			owner: owner,
-			repo:  repo,
-		}
-
-		_, err := api.FetchIssues()
+		// Test the token by listing issues across all repos
+		api := &GitHubAPI{token: token}
+		_, err := api.FetchAllIssuesForUser()
 		if err != nil {
 			return GitHubSetupCompleteMsg{
 				Success: false,
@@ -296,8 +237,9 @@ func (m *GitHubSetupModel) saveConfiguration() tea.Cmd {
 		// Save to configuration
 		viper.Set("github.enabled", true)
 		viper.Set("github.token", token)
-		viper.Set("github.owner", owner)
-		viper.Set("github.repo", repo)
+		// Clear owner/repo to indicate all-repos scope
+		viper.Set("github.owner", "")
+		viper.Set("github.repo", "")
 
 		if err := viper.WriteConfig(); err != nil {
 			return GitHubSetupCompleteMsg{

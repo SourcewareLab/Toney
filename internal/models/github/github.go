@@ -39,6 +39,7 @@ type GitHubIssue struct {
 	CreatedAt  string  `json:"created_at"`
 	UpdatedAt  string  `json:"updated_at"`
 	HTMLURL    string  `json:"html_url"`
+	Repo       string  `json:"-"`
 }
 
 type Label struct {
@@ -77,7 +78,6 @@ func (d issueDelegate) Render(w io.Writer, m list.Model, index int, listItem lis
 		rightStyle = rightStyle.Foreground(colors.MenuSelectedText)
 	}
 
-	// Space-fill to align right timestamp
 	totalW := m.Width()
 	left := titleStyle.Render(title)
 	right := rightStyle.Render(updated)
@@ -87,7 +87,6 @@ func (d issueDelegate) Render(w io.Writer, m list.Model, index int, listItem lis
 	}
 	titleRow := lipgloss.JoinHorizontal(lipgloss.Left, left, strings.Repeat(" ", pad), right)
 
-	// Author and description (truncated)
 	desc := issue.Description()
 	maxDescWidth := m.Width() - 10
 	if len(desc) > maxDescWidth {
@@ -152,7 +151,11 @@ func (i GitHubIssue) Title() string {
 	if i.State == "closed" {
 		status = "CLOSED"
 	}
-	return fmt.Sprintf("[%s] #%d %s", status, i.Number, i.IssueTitle)
+	repoPrefix := ""
+	if i.Repo != "" {
+		repoPrefix = fmt.Sprintf("%s ", i.Repo)
+	}
+	return fmt.Sprintf("%s[%s] #%d %s", repoPrefix, status, i.Number, i.IssueTitle)
 }
 
 func (i GitHubIssue) Description() string {
@@ -215,9 +218,7 @@ func NewGitHubModel(w int, h int) *GitHubModel {
 
 func NewGitHubSetupOrIssuesModel(w int, h int) tea.Model {
 	if !config.AppConfig.GitHub.Enabled ||
-		config.AppConfig.GitHub.Token == "" ||
-		config.AppConfig.GitHub.Owner == "" ||
-		config.AppConfig.GitHub.Repo == "" {
+		config.AppConfig.GitHub.Token == "" {
 		return NewGitHubSetupModel()
 	}
 
@@ -315,7 +316,6 @@ func (m *GitHubModel) applyListItems() {
 		})
 	}
 
-	// Load into list
 	items := make([]list.Item, len(issues))
 	for idx, is := range issues {
 		items[idx] = is
@@ -362,7 +362,7 @@ func (m *GitHubModel) renderDisabledView() string {
 }
 
 func (m *GitHubModel) renderLoadingView() string {
-	repoInfo := fmt.Sprintf("%s/%s", config.AppConfig.GitHub.Owner, config.AppConfig.GitHub.Repo)
+	repoInfo := "all repositories"
 
 	// Helper function for responsive width
 	maxWidth := 80
@@ -609,7 +609,7 @@ func (m *GitHubModel) SetFocus(focused bool) {
 func (m *GitHubModel) SyncIssues() tea.Cmd {
 	return func() tea.Msg {
 		api := NewGitHubAPI()
-		issues, err := api.FetchIssues()
+		issues, err := api.FetchAllIssuesForUser()
 		// Sort by title as soon as we fetch
 		if err == nil {
 			sort.Slice(issues, func(i, j int) bool {
