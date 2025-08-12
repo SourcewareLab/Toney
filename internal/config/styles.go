@@ -7,6 +7,8 @@ type StylesConfig struct {
 	FocusedBorder    string           `mapstructure:"focused_border"`
 	MenuSelectedBg   string           `mapstructure:"menu_selected_bg"`
 	MenuSelectedText string           `mapstructure:"menu_selected_text"`
+	ErrorBg          string           `mapstructure:"error_background"` // TODO: Docs
+	ErrorText        string           `mapstructure:"error_text"`       // TODO: Docs
 	Icons            IconsConfig      `mapstructure:"icons"`
 	Renderer         RendererConfig   `mapstructure:"renderer"`
 	TaskStyles       TaskStylesConfig `mapstructure:"task_styles"`

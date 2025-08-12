@@ -6,6 +6,14 @@ import (
 )
 
 type (
+	ErrorMsg struct {
+		Title string
+		Msg   string
+		Locn  string
+	}
+
+	CloseError struct{}
+
 	FzfSelection struct {
 		Selection string
 		Exited    bool

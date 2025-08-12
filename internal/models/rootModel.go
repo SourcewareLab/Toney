@@ -5,16 +5,20 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
 	"github.com/SourcewareLab/Toney/internal/messages"
 	"github.com/SourcewareLab/Toney/internal/models/daily"
 	"github.com/SourcewareLab/Toney/internal/models/diary"
+	errorpopup "github.com/SourcewareLab/Toney/internal/models/error"
 	filepopup "github.com/SourcewareLab/Toney/internal/models/filePopup"
 	"github.com/SourcewareLab/Toney/internal/models/github"
 	homemodel "github.com/SourcewareLab/Toney/internal/models/homeModel"
 	"github.com/SourcewareLab/Toney/internal/models/menu"
+	"github.com/SourcewareLab/Toney/internal/utils"
+	overlay "github.com/rmhubbert/bubbletea-overlay"
 
 	"github.com/SourcewareLab/Toney/internal/colors"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,19 +26,22 @@ import (
 )
 
 type RootModel struct {
-	Width         int
-	Height        int
-	Page          enums.Page
-	Home          *homemodel.HomeModel
-	Menu          *menu.Menu
-	Daily         *daily.Daily
-	Diary         *diary.Diary
-	GitHub        *github.GitHubModel
-	CurrentPage   enums.Page
-	ShowPopup     bool
-	FilePopupType enums.PopupType
-	FilePopup     *filepopup.FilePopup
-	isLoading     bool
+	Width          int
+	Height         int
+	Page           enums.Page
+	Home           *homemodel.HomeModel
+	Menu           *menu.Menu
+	Daily          *daily.Daily
+	Diary          *diary.Diary
+  GitHub        *github.GitHubModel
+	ErrorPopup     *errorpopup.ErrorPopup
+	Overlay        *overlay.Model
+	CurrentPage    enums.Page
+	ShowPopup      bool
+	FilePopupType  enums.PopupType
+	FilePopup      *filepopup.FilePopup
+	isLoading      bool
+	IsShowingError bool
 }
 
 func NewRoot() *RootModel {
@@ -51,6 +58,25 @@ func (m RootModel) Init() tea.Cmd {
 
 func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case messages.CloseError:
+		m.IsShowingError = false
+		return m, nil
+	case messages.ErrorMsg:
+		m.IsShowingError = true
+		m.ErrorPopup = errorpopup.NewErrorPopup(m.Width, m.Height, msg.Msg, msg.Title, msg.Locn)
+
+		var curr tea.Model
+		switch m.CurrentPage {
+		case enums.DailyPage:
+			curr = m.Daily
+		case enums.HomePage:
+			curr = m.Home
+		case enums.DiaryPage:
+			curr = m.Diary
+		}
+
+		m.Overlay = overlay.New(m.ErrorPopup, curr, overlay.Right, overlay.Top, 2, 2)
+		return m, tea.Tick(3*time.Second, func(_ time.Time) tea.Msg { return messages.CloseError{} })
 	case messages.FzfSelection:
 		switch m.CurrentPage {
 		case enums.MenuPage:
@@ -141,7 +167,7 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if msg.Err != nil {
-			fmt.Println(msg.Err.Error())
+			return m, utils.ReturnError("Root", "Error Closing Editor", msg.Err)
 		}
 		m.Home.FileExplorer.Update(msg)
 		m.Home.Viewer.Update(msg)
@@ -160,8 +186,9 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			err := command.Run()
 			if err != nil {
-				fmt.Println(err.Error())
+				return m, utils.ReturnError("Root", "Error Closing Editor", err)
 			}
+			return m, nil
 		case "ctrl+c":
 			// Stop script
 			script := strings.Join(config.AppConfig.General.StopScript, " ")
@@ -172,7 +199,7 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			err := command.Run()
 			if err != nil {
-				fmt.Println(err.Error())
+				return m, utils.ReturnError("Root", "Error Closing Editor", err)
 			}
 			return m, tea.Quit
 		}
@@ -227,6 +254,10 @@ func (m *RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *RootModel) View() string {
 	if m.isLoading {
 		return lipgloss.NewStyle().Render("Loading...")
+	}
+
+	if m.IsShowingError {
+		return m.Overlay.View()
 	}
 
 	if m.ShowPopup && m.FilePopup != nil {

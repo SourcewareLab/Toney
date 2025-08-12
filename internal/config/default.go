@@ -64,6 +64,8 @@ func DefaultConfig() Config {
 			FocusedBorder:    "#b4befe",
 			MenuSelectedBg:   "#b4befe",
 			MenuSelectedText: "#1e1e2e",
+			ErrorBg:          "#11111b",
+			ErrorText:        "#f38ba8",
 			Icons: IconsConfig{
 				FolderIcon: "󰷏",
 				FileIcon:   "",

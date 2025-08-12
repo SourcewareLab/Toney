@@ -14,6 +14,8 @@ type Colors struct {
 	MenuSelectedText lipgloss.Color
 	TaskFocusedBar   lipgloss.Color
 	TaskUnfocusedBar lipgloss.Color
+	ErrorBg          lipgloss.Color
+	ErrorText        lipgloss.Color
 	CompletedTask    TaskColors
 	AbandonedTask    TaskColors
 	PendingTask      TaskColors
@@ -36,6 +38,8 @@ func ColorPalette() Colors {
 		TaskUnfocusedBar: lipgloss.Color(cfg.TaskStyles.UnfocusedBar),
 		MenuSelectedBg:   lipgloss.Color(cfg.MenuSelectedBg),
 		MenuSelectedText: lipgloss.Color(cfg.MenuSelectedText),
+		ErrorBg:          lipgloss.Color(cfg.ErrorBg),
+		ErrorText:        lipgloss.Color(cfg.ErrorText),
 		CompletedTask: TaskColors{
 			TaskTitle: lipgloss.Color(cfg.TaskStyles.CompletedStyle.Title),
 			TaskDesc:  lipgloss.Color(cfg.TaskStyles.CompletedStyle.Desc),
