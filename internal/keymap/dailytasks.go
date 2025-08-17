@@ -14,6 +14,8 @@ type DailyTaskMap struct {
 	ChangeStatus    key.Binding
 	DeleteTask      key.Binding
 	BackToMenu      key.Binding
+	TabRight        key.Binding
+	TabLeft         key.Binding
 }
 
 func NewDailyTaskMap() DailyTaskMap {
@@ -42,6 +44,14 @@ func NewDailyTaskMap() DailyTaskMap {
 		BackToMenu: key.NewBinding(
 			key.WithKeys(cfg.BackToMenu),
 			key.WithHelp(cfg.BackToMenu, "return to menu"),
+		),
+		TabRight: key.NewBinding(
+			key.WithKeys("right"),
+			key.WithHelp("right", "right tab"),
+		),
+		TabLeft: key.NewBinding(
+			key.WithKeys("left"),
+			key.WithHelp("left", "left tab"),
 		),
 	}
 }

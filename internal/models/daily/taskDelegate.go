@@ -35,22 +35,22 @@ func (d TaskDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 	switch t.Status {
 	case enums.Complete:
 		text += fmt.Sprintf("%s\n%s",
-			styles.CompletedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.CompletedIcon, t.Title())),
+			styles.CompletedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.CompletedIcon, Shorten(t.Title(), 35))),
 			styles.CompletedStyle().Desc.Render(t.Description()),
 		)
 	case enums.Pending:
 		text += fmt.Sprintf("%s\n%s",
-			styles.PendingStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.PendingIcon, t.Title())),
+			styles.PendingStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.PendingIcon, Shorten(t.Title(), 35))),
 			styles.PendingStyle().Desc.Render(t.Description()),
 		)
 	case enums.Started:
 		text += fmt.Sprintf("%s\n%s",
-			styles.StartedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.StartedIcon, t.Title())),
+			styles.StartedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.StartedIcon, Shorten(t.Title(), 35))),
 			styles.StartedStyle().Desc.Render(t.Description()),
 		)
 	case enums.Abandoned:
 		text += fmt.Sprintf("%s\n%s",
-			styles.AbandonedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.AbandonedIcon, t.Title())),
+			styles.AbandonedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.AbandonedIcon, Shorten(t.Title(), 35))),
 			styles.AbandonedStyle().Desc.Render(t.Description()),
 		)
 	}
@@ -66,4 +66,14 @@ func (d TaskDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 	}
 
 	io.WriteString(w, text)
+}
+
+func Shorten(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return lipgloss.NewStyle().Width(maxLen).Render(s)
+	}
+	if maxLen <= 1 {
+		return s[:maxLen]
+	}
+	return s[:maxLen-1] + "…"
 }

@@ -13,9 +13,27 @@ import (
 )
 
 type Tasks struct {
-	Recurring []Task `json:"recurring"`
-	Unique    []Task `json:"unique"`
+	Recurring []Task       `json:"recurring"`
+	Unique    []Task       `json:"unique"`
+	Github    []GithubTask `json:"github"`
 }
+
+type GithubTask struct {
+	TaskTitle string           `json:"title"`
+	TaskDesc  string           `json:"desc"`
+	Status    enums.TaskStatus `json:"status"`
+	Ref       string           `json:"ref"`
+	Repo      string           `json:"repo"`
+	Owner     string           `json:"owner"`
+	// We will not store these data in the file
+	Link     string   `json:"-"`
+	Labels   []string `json:"-"`
+	Assignee []string `json:"-"`
+}
+
+func (m GithubTask) Title() string       { return m.TaskTitle }
+func (m GithubTask) Description() string { return m.TaskDesc }
+func (m GithubTask) FilterValue() string { return m.TaskTitle }
 
 type Task struct {
 	TaskTitle string           `json:"title"`
@@ -31,20 +49,19 @@ func (m Task) Description() string { return m.TaskDesc }
 func (m Task) FilterValue() string { return m.TaskTitle }
 
 func (m Tasks) ItemsAsList() []list.Item {
-	list := make([]list.Item, 0, len(m.Recurring)+len(m.Unique))
+	lst1 := TaskToItems(m.Recurring)
+	lst2 := TaskToItems(m.Unique)
 
-	for i, v := range m.Recurring {
+	return append(lst1, lst2...)
+}
+
+func TaskToItems(tasks []Task) []list.Item {
+	list := make([]list.Item, 0)
+	for i, v := range tasks {
 		v.Index = i
 		v.TaskType = enums.RecurringTask
 		list = append(list, v)
 	}
-
-	for i, v := range m.Unique {
-		v.Index = i
-		v.TaskType = enums.UniqueTask
-		list = append(list, v)
-	}
-
 	return list
 }
 
