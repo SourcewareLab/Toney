@@ -16,6 +16,7 @@ type DailyTaskMap struct {
 	BackToMenu      key.Binding
 	TabRight        key.Binding
 	TabLeft         key.Binding
+	RefreshGithub   key.Binding
 }
 
 func NewDailyTaskMap() DailyTaskMap {
@@ -47,11 +48,15 @@ func NewDailyTaskMap() DailyTaskMap {
 		),
 		TabRight: key.NewBinding(
 			key.WithKeys("right"),
-			key.WithHelp("right", "right tab"),
+			key.WithHelp("right", "tasks/github tab"),
 		),
 		TabLeft: key.NewBinding(
 			key.WithKeys("left"),
-			key.WithHelp("left", "left tab"),
+			key.WithHelp("left", "tasks/github tab"),
+		),
+		RefreshGithub: key.NewBinding(
+			key.WithKeys("ctrl+r"),
+			key.WithHelp("ctrl+r", "refresh github"),
 		),
 	}
 }

@@ -24,35 +24,68 @@ func (d TaskDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 		return
 	}
 
-	t, ok := item.(Task)
-	if !ok {
-		return
-	}
-
 	text := ""
 	cfg := config.AppConfig.Styles.Icons.TaskIcons
 
-	switch t.Status {
-	case enums.Complete:
-		text += fmt.Sprintf("%s\n%s",
-			styles.CompletedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.CompletedIcon, Shorten(t.Title(), 35))),
-			styles.CompletedStyle().Desc.Render(t.Description()),
-		)
-	case enums.Pending:
-		text += fmt.Sprintf("%s\n%s",
-			styles.PendingStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.PendingIcon, Shorten(t.Title(), 35))),
-			styles.PendingStyle().Desc.Render(t.Description()),
-		)
-	case enums.Started:
-		text += fmt.Sprintf("%s\n%s",
-			styles.StartedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.StartedIcon, Shorten(t.Title(), 35))),
-			styles.StartedStyle().Desc.Render(t.Description()),
-		)
-	case enums.Abandoned:
-		text += fmt.Sprintf("%s\n%s",
-			styles.AbandonedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.AbandonedIcon, Shorten(t.Title(), 35))),
-			styles.AbandonedStyle().Desc.Render(t.Description()),
-		)
+	// Check if it's a regular Task
+	if t, ok := item.(Task); ok {
+		switch t.Status {
+		case enums.Complete:
+			text += fmt.Sprintf("%s\n%s",
+				styles.CompletedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.CompletedIcon, Shorten(t.Title(), 35))),
+				styles.CompletedStyle().Desc.Render(t.Description()),
+			)
+		case enums.Pending:
+			text += fmt.Sprintf("%s\n%s",
+				styles.PendingStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.PendingIcon, Shorten(t.Title(), 35))),
+				styles.PendingStyle().Desc.Render(t.Description()),
+			)
+		case enums.Started:
+			text += fmt.Sprintf("%s\n%s",
+				styles.StartedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.StartedIcon, Shorten(t.Title(), 35))),
+				styles.StartedStyle().Desc.Render(t.Description()),
+			)
+		case enums.Abandoned:
+			text += fmt.Sprintf("%s\n%s",
+				styles.AbandonedStyle().Title.Render(fmt.Sprintf("%s | %s", cfg.AbandonedIcon, Shorten(t.Title(), 35))),
+				styles.AbandonedStyle().Desc.Render(t.Description()),
+			)
+		}
+	} else if gt, ok := item.(GithubTask); ok {
+		// Handle GitHub Task with special styling
+		githubIcon := "🐙" // GitHub icon
+		repoInfo := fmt.Sprintf("[%s/%s%s]", gt.Owner, gt.Repo, gt.Ref)
+
+		switch gt.Status {
+		case enums.Complete:
+			text += fmt.Sprintf("%s\n%s",
+				styles.CompletedStyle().Title.Render(fmt.Sprintf("%s | %s %s", cfg.CompletedIcon, Shorten(gt.Title(), 25), repoInfo)),
+				styles.CompletedStyle().Desc.Render(fmt.Sprintf("%s %s", githubIcon, Shorten(gt.Description(), 50))),
+			)
+		case enums.Pending:
+			text += fmt.Sprintf("%s\n%s",
+				styles.PendingStyle().Title.Render(fmt.Sprintf("%s | %s %s", cfg.PendingIcon, Shorten(gt.Title(), 25), repoInfo)),
+				styles.PendingStyle().Desc.Render(fmt.Sprintf("%s %s", githubIcon, Shorten(gt.Description(), 50))),
+			)
+		case enums.Started:
+			text += fmt.Sprintf("%s\n%s",
+				styles.StartedStyle().Title.Render(fmt.Sprintf("%s | %s %s", cfg.StartedIcon, Shorten(gt.Title(), 25), repoInfo)),
+				styles.StartedStyle().Desc.Render(fmt.Sprintf("%s %s", githubIcon, Shorten(gt.Description(), 50))),
+			)
+		case enums.Abandoned:
+			text += fmt.Sprintf("%s\n%s",
+				styles.AbandonedStyle().Title.Render(fmt.Sprintf("%s | %s %s", cfg.AbandonedIcon, Shorten(gt.Title(), 25), repoInfo)),
+				styles.AbandonedStyle().Desc.Render(fmt.Sprintf("%s %s", githubIcon, Shorten(gt.Description(), 50))),
+			)
+		default:
+			// Default to pending style for GitHub issues (since they're typically open)
+			text += fmt.Sprintf("%s\n%s",
+				styles.PendingStyle().Title.Render(fmt.Sprintf("%s | %s %s", cfg.PendingIcon, Shorten(gt.Title(), 25), repoInfo)),
+				styles.PendingStyle().Desc.Render(fmt.Sprintf("%s %s", githubIcon, Shorten(gt.Description(), 50))),
+			)
+		}
+	} else {
+		return
 	}
 
 	border := lipgloss.NewStyle().Border(lipgloss.NormalBorder()).

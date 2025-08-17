@@ -49,17 +49,44 @@ func (m Task) Description() string { return m.TaskDesc }
 func (m Task) FilterValue() string { return m.TaskTitle }
 
 func (m Tasks) ItemsAsList() []list.Item {
-	lst1 := TaskToItems(m.Recurring)
-	lst2 := TaskToItems(m.Unique)
+	lst1 := RecurringTaskToItems(m.Recurring)
+	lst2 := UniqueTaskToItems(m.Unique)
 
 	return append(lst1, lst2...)
 }
 
-func TaskToItems(tasks []Task) []list.Item {
+func (m Tasks) ItemsAsListWithGithub() []list.Item {
+	lst1 := RecurringTaskToItems(m.Recurring)
+	lst2 := UniqueTaskToItems(m.Unique)
+	lst3 := GithubTaskToItems(m.Github)
+
+	result := append(lst1, lst2...)
+	return append(result, lst3...)
+}
+
+func RecurringTaskToItems(tasks []Task) []list.Item {
 	list := make([]list.Item, 0)
 	for i, v := range tasks {
 		v.Index = i
 		v.TaskType = enums.RecurringTask
+		list = append(list, v)
+	}
+	return list
+}
+
+func UniqueTaskToItems(tasks []Task) []list.Item {
+	list := make([]list.Item, 0)
+	for i, v := range tasks {
+		v.Index = i
+		v.TaskType = enums.UniqueTask
+		list = append(list, v)
+	}
+	return list
+}
+
+func GithubTaskToItems(tasks []GithubTask) []list.Item {
+	list := make([]list.Item, 0)
+	for _, v := range tasks {
 		list = append(list, v)
 	}
 	return list

@@ -12,7 +12,7 @@ const (
 type TaskTabs string
 
 const (
-	All       TaskTabs = "All"
+	Tasks     TaskTabs = "Tasks"
 	Unique    TaskTabs = "Unique"
 	Recurring TaskTabs = "Recurring"
 	Github    TaskTabs = "Github"

@@ -31,6 +31,10 @@ func (m Daily) DeleteTask(msg messages.TaskPopupMessage) {
 
 	task, ok := item.(Task)
 	if !ok { // Making sure that item is of type Task
+		// If it's a GitHub task, we can't delete it locally
+		if _, isGithubTask := item.(GithubTask); isGithubTask {
+			return // GitHub tasks can't be deleted from the local task list
+		}
 		return
 	}
 
@@ -49,6 +53,10 @@ func (m Daily) StatusChangeTask(msg messages.TaskPopupMessage) {
 
 	task, ok := item.(Task)
 	if !ok { // Making sure that item is of type Task
+		// If it's a GitHub task, we can't change its status locally
+		if _, isGithubTask := item.(GithubTask); isGithubTask {
+			return // GitHub tasks status can't be changed from the local task list
+		}
 		return
 	}
 
@@ -75,6 +83,10 @@ func (m Daily) EditTask(msg messages.TaskPopupMessage) {
 
 	oldTask, ok := item.(Task)
 	if !ok { // Making sure that item is of type Task
+		// If it's a GitHub task, we can't edit it locally
+		if _, isGithubTask := item.(GithubTask); isGithubTask {
+			return // GitHub tasks can't be edited from the local task list
+		}
 		return
 	}
 

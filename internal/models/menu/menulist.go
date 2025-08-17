@@ -22,11 +22,6 @@ type MenuList struct {
 func NewMenuList(w int, h int, opts map[enums.Page]string) *MenuList {
 	selections := []enums.Page{enums.HomePage, enums.DailyPage, enums.DiaryPage}
 
-	// Add GitHub option if it exists in the options map
-	if _, hasGitHub := opts[enums.GitHubPage]; hasGitHub {
-		selections = append(selections, enums.GitHubPage)
-	}
-
 	// Always add Quit at the end
 	selections = append(selections, enums.Quit)
 
