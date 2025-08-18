@@ -107,7 +107,7 @@ func syncGitHubIssues() error {
 	fmt.Printf("🔄 Syncing issues from all repositories...\n")
 
 	api := github.NewGitHubAPI()
-	issues, err := api.FetchIssues()
+	issues, err := api.FetchAllIssuesForUser()
 	if err != nil {
 		return fmt.Errorf("failed to fetch issues: %w", err)
 	}

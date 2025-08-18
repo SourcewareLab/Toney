@@ -304,7 +304,7 @@ func (m *Daily) SyncGitHub() tea.Cmd {
 
 	return func() tea.Msg {
 		api := github.NewGitHubAPI()
-		issues, err := api.FetchIssues()
+		issues, err := api.FetchAllIssuesForUser()
 		return GitHubSyncMsg{
 			Issues: issues,
 			Error:  err,

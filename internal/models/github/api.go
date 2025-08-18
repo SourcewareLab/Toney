@@ -63,13 +63,6 @@ func convertLabels(apiLabels []GitHubLabel) []Label {
 	return labels
 }
 
-func (api *GitHubAPI) FetchIssues() ([]GitHubIssue, error) {
-	if api.token == "" {
-		return nil, fmt.Errorf("GitHub token is missing")
-	}
-	return api.FetchAllIssuesForUser()
-}
-
 func (api *GitHubAPI) FetchAllIssuesForUser() ([]GitHubIssue, error) {
 	if api.token == "" {
 		return nil, fmt.Errorf("GitHub token is missing")

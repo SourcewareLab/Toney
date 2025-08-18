@@ -121,7 +121,7 @@ func (m *GitHubSetupModel) renderSetupView() string {
 	// Instructions
 	instructions := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#cdd6f4")).
-		Render("Configure your GitHub integration to access issues as structured notes.\n\n")
+		Render("Configure your GitHub integration to access issues.\n\n")
 
 	content.WriteString(instructions)
 
@@ -184,8 +184,7 @@ func (m *GitHubSetupModel) renderSuccessView() string {
 		Foreground(lipgloss.Color("#cdd6f4")).
 		Render("Scope: All repositories\n") +
 		"Status: Enabled\n\n" +
-		"The 'GitHub Issues' option will now appear in the main menu.\n" +
-		"You can browse and convert issues to structured notes.\n\n" +
+		"The 'GitHub Issues' option will now appear in the daily tasks.\n" +
 		"Press Enter to return to the main menu."
 
 	return successStyle.Render(content)
