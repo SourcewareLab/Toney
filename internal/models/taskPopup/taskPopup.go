@@ -46,10 +46,7 @@ func (m *TaskPopup) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.Keymap.Enter):
-			if m.Type == enums.CreateUnique && !m.ShowSelect {
-				m.ShowSelect = true
-				return m, nil
-			} else if m.Type == enums.CreateRecurring && !m.ShowSelect {
+			if m.Type == enums.CreateTask && !m.ShowSelect {
 				m.ShowSelect = true
 				return m, nil
 			}
@@ -70,9 +67,7 @@ func (m *TaskPopup) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch m.Type {
-	case enums.CreateRecurring:
-		fallthrough
-	case enums.CreateUnique:
+	case enums.CreateTask:
 		if m.ShowSelect {
 			updated, _ := m.Select.Update(msg)
 			if sel, ok := updated.(*SelectStatus); ok { // Type matching, cause I cant assign it straightaway
@@ -112,9 +107,7 @@ func (m *TaskPopup) View() string {
 	view := ""
 
 	switch m.Type {
-	case enums.CreateRecurring:
-		fallthrough
-	case enums.CreateUnique:
+	case enums.CreateTask:
 		if m.ShowSelect {
 			view = lipgloss.JoinVertical(lipgloss.Center,
 				styles.GetSelectStatus(m.Width, m.Height/2),
@@ -135,7 +128,7 @@ func (m *TaskPopup) View() string {
 	}
 
 	binds := m.Keymap.Bindings()
-	if m.Type == enums.CreateUnique || m.Type == enums.Edit || m.Type == enums.CreateRecurring {
+	if m.Type == enums.CreateTask || m.Type == enums.Edit {
 		binds = append(binds, m.Form.Keymap.Bindings()...)
 	}
 

@@ -28,22 +28,15 @@ type Viewer struct {
 }
 
 func NewViewer(w int, h int) *Viewer {
-	vp := viewport.New(w*3/4, h)
+	vp := viewport.New(w*3/4-8, h-6)
 	vp.YOffset = 0
-	vp.Style = lipgloss.NewStyle().
-		Align(lipgloss.Center, lipgloss.Center).
-		BorderStyle(lipgloss.RoundedBorder()).
-		MarginTop(0).
-		Padding(1, 1).
-		BorderForeground(colors.ColorPalette().Border).
-		Foreground(colors.ColorPalette().Text)
 	vp.SetContent(
-		lipgloss.Place(w*3/4, h-2, lipgloss.Center, lipgloss.Center,
+		lipgloss.Place(w*3/4-8, h-6, lipgloss.Center, lipgloss.Center,
 			lipgloss.NewStyle().Foreground(colors.ColorPalette().Text).Render("Select a file to view its contents"),
 		))
 
 	r, _ := glamour.NewTermRenderer(glamour.WithStyles(config.ToGlamourStyle(config.AppConfig.Styles.Renderer)),
-		glamour.WithWordWrap(w*3/4-2))
+		glamour.WithWordWrap(w*3/4-10))
 
 	return &Viewer{
 		Viewport:  vp,
@@ -74,8 +67,8 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.Height = msg.Height
 
-		m.Viewport.Height = msg.Height
-		m.Viewport.Width = msg.Width * 3 / 4
+		m.Viewport.Height = msg.Height - 6
+		m.Viewport.Width = msg.Width*3/4 - 8
 
 		return m, nil
 	}
@@ -93,30 +86,34 @@ func (m *Viewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Viewer) View() string {
+	borderColor := colors.ColorPalette().Border
 	if m.IsFocused {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(colors.ColorPalette().FocusedBorder)
-	} else {
-		m.Viewport.Style = m.Viewport.Style.BorderForeground(colors.ColorPalette().Border)
+		borderColor = colors.ColorPalette().FocusedBorder
 	}
-	// Simple help line at the bottom, no header/footer widgets
-	help := lipgloss.NewStyle().
-		Foreground(colors.ColorPalette().Text).
-		PaddingLeft(2).
-		Render("esc: back")
-	// Ensure viewport height fits above help line
-	bodyH := m.Height - lipgloss.Height(help)
-	if bodyH < 3 {
-		bodyH = 3
-	}
-	m.Viewport.Width = m.Width
-	m.Viewport.Height = bodyH
-	box := lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(colors.ColorPalette().Border).
-		Width(m.Width).
-		Height(bodyH).
-		Padding(0, 0)
-	return lipgloss.JoinVertical(lipgloss.Left, box.Render(m.Viewport.View()), help)
+
+	// Use the updated width calculation from homeModel
+	viewerWidth := m.Width - 4
+	m.Viewport.Width = viewerWidth - 6
+	m.Viewport.Height = m.Height - 6
+
+	// Explicit border definition to ensure right border shows
+	viewerStyle := lipgloss.NewStyle().
+		Width(viewerWidth).
+		Height(m.Height-3).
+		Padding(1, 2).
+		Border(lipgloss.Border{
+			Top:         "─",
+			Bottom:      "─",
+			Left:        "│",
+			Right:       "│",
+			TopLeft:     "╭",
+			TopRight:    "╮",
+			BottomLeft:  "╰",
+			BottomRight: "╯",
+		}).
+		BorderForeground(borderColor)
+
+	return viewerStyle.Render(m.Viewport.View())
 }
 
 func (m *Viewer) Header() string {

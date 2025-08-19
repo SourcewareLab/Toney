@@ -8,27 +8,22 @@ import (
 )
 
 type DailyTaskMap struct {
-	CreateUnique    key.Binding
-	CreateRecurring key.Binding
-	EditTask        key.Binding
-	ChangeStatus    key.Binding
-	DeleteTask      key.Binding
-	BackToMenu      key.Binding
-	TabRight        key.Binding
-	TabLeft         key.Binding
-	RefreshGithub   key.Binding
+	CreateTask    key.Binding
+	EditTask      key.Binding
+	ChangeStatus  key.Binding
+	DeleteTask    key.Binding
+	BackToMenu    key.Binding
+	TabRight      key.Binding
+	TabLeft       key.Binding
+	RefreshGithub key.Binding
 }
 
 func NewDailyTaskMap() DailyTaskMap {
 	cfg := config.AppConfig.Keybinds.Daily
 	return DailyTaskMap{
-		CreateUnique: key.NewBinding(
+		CreateTask: key.NewBinding(
 			key.WithKeys(cfg.Create),
 			key.WithHelp(cfg.Create, "create"),
-		),
-		CreateRecurring: key.NewBinding(
-			key.WithKeys(cfg.CreateRecurring),
-			key.WithHelp(cfg.CreateRecurring, "new recurring"),
 		),
 		EditTask: key.NewBinding(
 			key.WithKeys(cfg.Edit),

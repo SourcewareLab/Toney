@@ -46,7 +46,7 @@ func NewFileExplorer(w int, h int) *FileExplorer {
 	return &FileExplorer{
 		Width:        w,
 		Height:       h,
-		Vp:           viewport.New(w/4-1, h),
+		Vp:           viewport.New(w/4-4, h-6),
 		Root:         root,
 		CurrentNode:  root,
 		CurrentIndex: 0,
@@ -157,23 +157,28 @@ func (m *FileExplorer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m FileExplorer) View() string {
 	style := styles.BorderStyle()
-	style = style.Align(lipgloss.Left, lipgloss.Top).MarginTop(1)
+	style = style.Align(lipgloss.Left, lipgloss.Top).Width(m.Width / 4).Height(m.Height - 3)
 
 	if m.IsFocused {
 		style = style.BorderForeground(colors.ColorPalette().FocusedBorder)
+	} else {
+		style = style.BorderForeground(colors.ColorPalette().Border)
 	}
 
 	s := filetree.BuildNodeTree(m.Root, "", len(m.Root.Children) == 0, m.CurrentNode)
 
 	m.Vp.SetContent(s)
-	m.Vp.Style = style
+	m.Vp.Width = m.Width/4 - 4
+	m.Vp.Height = m.Height - 6
 
-	return m.Vp.View()
+	return style.Render(m.Vp.View())
 }
 
 func (m *FileExplorer) Resize(w int, h int) {
 	m.Height = h
 	m.Width = w
+	m.Vp.Width = w/4 - 4
+	m.Vp.Height = h - 6
 }
 
 func (m *FileExplorer) SelectionChanged(node *filetree.Node) tea.Cmd {

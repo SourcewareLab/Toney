@@ -86,7 +86,10 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Height = msg.Height
 
 		m.FileExplorer.Resize(msg.Width, msg.Height)
-		m.Viewer = viewer.NewViewer(msg.Width, m.Height)
+		updated, _ := m.Viewer.Update(msg)
+		if v, ok := updated.(*viewer.Viewer); ok {
+			m.Viewer = v
+		}
 
 		return m, nil
 	case tea.KeyMsg:
@@ -153,7 +156,14 @@ func (m HomeModel) View() string {
 		)
 	}
 
-	main := lipgloss.JoinHorizontal(lipgloss.Top, m.FileExplorer.View(), m.Viewer.View())
+	// Ensure proper sizing before joining - leave space for viewer's right border
+	explorerView := m.FileExplorer.View()
+
+	// Force viewer to use less width to ensure right border is visible
+	m.Viewer.Width = m.Width - (m.Width / 4) - 2
+	viewerView := m.Viewer.View()
+
+	main := lipgloss.JoinHorizontal(lipgloss.Top, explorerView, viewerView)
 
 	help := lipgloss.NewStyle().PaddingLeft(2).Render(m.Help.View(keymap.NewDynamic(bindings)))
 

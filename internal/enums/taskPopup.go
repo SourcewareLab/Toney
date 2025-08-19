@@ -3,8 +3,7 @@ package enums
 type TaskPopup int
 
 const (
-	CreateUnique = iota
-	CreateRecurring
+	CreateTask = iota
 	Delete
 	Edit
 	ChangeStatus

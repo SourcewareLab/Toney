@@ -20,7 +20,6 @@ import (
 	"github.com/SourcewareLab/Toney/internal/utils"
 	overlay "github.com/rmhubbert/bubbletea-overlay"
 
-	"github.com/SourcewareLab/Toney/internal/colors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -244,7 +243,7 @@ func (m *RootModel) View() string {
 
 	switch m.CurrentPage {
 	case enums.HomePage:
-		return lipgloss.NewStyle().Background(colors.ColorPalette().Background).Render(m.Home.View())
+		return m.Home.View()
 	case enums.MenuPage:
 		return m.Menu.View()
 	case enums.DailyPage:
@@ -253,6 +252,6 @@ func (m *RootModel) View() string {
 		return m.Diary.View()
 
 	default:
-		return lipgloss.NewStyle().Background(colors.ColorPalette().Background).Render(m.Home.View())
+		return m.Home.View()
 	}
 }

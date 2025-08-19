@@ -2,7 +2,6 @@ package daily
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/SourcewareLab/Toney/internal/colors"
 	"github.com/SourcewareLab/Toney/internal/config"
@@ -77,16 +76,14 @@ func (m *Daily) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Tasks.Github = []GithubTask{}
 		} else {
 			m.GithubError = ""
-			m.Tasks.Github = convertGitHubIssuestoGithubTasks(msg.Issues)
+			m.Tasks.Github = ConvertGitHubIssuestoGithubTasks(msg.Issues)
 		}
 		m.refreshList()
 		return m, nil
 	case messages.TaskPopupMessage:
 		switch msg.Type {
-		case enums.CreateRecurring:
-			fallthrough
-		case enums.CreateUnique:
-			m.CreateTask(msg, msg.Type == enums.CreateUnique)
+		case enums.CreateTask:
+			m.CreateTask(msg)
 		case enums.Delete:
 			m.DeleteTask(msg)
 		case enums.ChangeStatus:
@@ -107,12 +104,8 @@ func (m *Daily) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		switch {
-		case key.Matches(msg, m.Keymap.CreateUnique):
-			m.Popup = taskpopup.NewPopup(m.Width, m.Height, enums.CreateUnique)
-			m.ShowPopup = true
-			return m, nil
-		case key.Matches(msg, m.Keymap.CreateRecurring):
-			m.Popup = taskpopup.NewPopup(m.Width, m.Height, enums.CreateRecurring)
+		case key.Matches(msg, m.Keymap.CreateTask):
+			m.Popup = taskpopup.NewPopup(m.Width, m.Height, enums.CreateTask)
 			m.ShowPopup = true
 			return m, nil
 		case key.Matches(msg, m.Keymap.ChangeStatus):
@@ -165,12 +158,6 @@ func (m *Daily) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			m.Refresh()
-			// Auto-refresh GitHub data when switching to GitHub tab
-			if m.Tabs[m.CurrentTab] == enums.Github {
-				m.LoadingGithub = true
-				m.GithubError = ""
-				return m, m.SyncGitHub()
-			}
 			return m, nil
 		case key.Matches(msg, m.Keymap.TabLeft):
 			m.CurrentTab--
@@ -179,12 +166,6 @@ func (m *Daily) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			m.Refresh()
-			// Auto-refresh GitHub data when switching to GitHub tab
-			if m.Tabs[m.CurrentTab] == enums.Github {
-				m.LoadingGithub = true
-				m.GithubError = ""
-				return m, m.SyncGitHub()
-			}
 			return m, nil
 		case key.Matches(msg, m.Keymap.RefreshGithub):
 			// Force refresh GitHub data asynchronously
@@ -207,14 +188,16 @@ func (m *Daily) View() string {
 	}
 
 	statusLine := ""
-	if m.LoadingGithub {
-		statusLine = lipgloss.NewStyle().
-			Foreground(colors.ColorPalette().Text).
-			Render("🔄 Loading GitHub issues...")
-	} else if m.GithubError != "" {
-		statusLine = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("196")).
-			Render(m.GithubError)
+	if m.Tabs[m.CurrentTab] == enums.Github {
+		if m.LoadingGithub {
+			statusLine = lipgloss.NewStyle().
+				Foreground(colors.ColorPalette().Text).
+				Render("🔄 Loading GitHub issues...")
+		} else if m.GithubError != "" {
+			statusLine = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("196")).
+				Render(m.GithubError)
+		}
 	}
 
 	main := lipgloss.JoinVertical(lipgloss.Left,
@@ -233,7 +216,7 @@ func (m *Daily) View() string {
 				if m.LoadingGithub {
 					emptyMessage = "No local tasks. Loading GitHub issues..."
 				} else {
-					emptyMessage = "No tasks found. Create unique with 'c' or recurring with 'r', sync GitHub with 'ctrl+r'!"
+					emptyMessage = "No tasks found. Create task with 'c', sync GitHub with 'ctrl+r'!"
 				}
 			case enums.Github:
 				if config.AppConfig.GitHub.Enabled && config.AppConfig.GitHub.Token != "" {
@@ -310,39 +293,4 @@ func (m *Daily) SyncGitHub() tea.Cmd {
 			Error:  err,
 		}
 	}
-}
-
-func convertGitHubIssuestoGithubTasks(issues []github.GitHubIssue) []GithubTask {
-	tasks := make([]GithubTask, len(issues))
-	for i, issue := range issues {
-		// Extract owner and repo from the repo field (format: "owner/repo")
-		repoParts := strings.Split(issue.Repo, "/")
-		owner := ""
-		repo := ""
-		if len(repoParts) == 2 {
-			owner = repoParts[0]
-			repo = repoParts[1]
-		}
-
-		tasks[i] = GithubTask{
-			TaskTitle: issue.IssueTitle,
-			TaskDesc:  issue.Body,
-			Status:    enums.Pending, // GitHub issues are typically "pending" in task context
-			Ref:       fmt.Sprintf("#%d", issue.Number),
-			Repo:      repo,
-			Owner:     owner,
-			Link:      issue.HTMLURL,
-			Labels:    convertLabelsToStrings(issue.Labels),
-			Assignee:  issue.Assignees,
-		}
-	}
-	return tasks
-}
-
-func convertLabelsToStrings(labels []github.Label) []string {
-	result := make([]string, len(labels))
-	for i, label := range labels {
-		result[i] = label.Name
-	}
-	return result
 }

@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/SourcewareLab/Toney/internal/config"
 	"github.com/SourcewareLab/Toney/internal/enums"
+	"github.com/SourcewareLab/Toney/internal/models/github"
 	"github.com/charmbracelet/bubbles/list"
 )
 
 type Tasks struct {
-	Recurring []Task       `json:"recurring"`
-	Unique    []Task       `json:"unique"`
-	Github    []GithubTask `json:"github"`
+	All    []Task       `json:"all"`
+	Github []GithubTask `json:"github"`
 }
 
 type GithubTask struct {
@@ -40,8 +41,7 @@ type Task struct {
 	TaskDesc  string           `json:"desc"`
 	Status    enums.TaskStatus `json:"status"`
 	// We will not store these data in the file
-	Index    int            `json:"-"` // Point to index in the respective type array
-	TaskType enums.TaskType `json:"-"`
+	Index int `json:"-"` // Point to index in the array
 }
 
 func (m Task) Title() string       { return m.TaskTitle }
@@ -49,36 +49,20 @@ func (m Task) Description() string { return m.TaskDesc }
 func (m Task) FilterValue() string { return m.TaskTitle }
 
 func (m Tasks) ItemsAsList() []list.Item {
-	lst1 := RecurringTaskToItems(m.Recurring)
-	lst2 := UniqueTaskToItems(m.Unique)
+	return TasksToItems(m.All)
+}
+
+func (m Tasks) ItemsAsListWithGithub() []list.Item {
+	lst1 := TasksToItems(m.All)
+	lst2 := GithubTaskToItems(m.Github)
 
 	return append(lst1, lst2...)
 }
 
-func (m Tasks) ItemsAsListWithGithub() []list.Item {
-	lst1 := RecurringTaskToItems(m.Recurring)
-	lst2 := UniqueTaskToItems(m.Unique)
-	lst3 := GithubTaskToItems(m.Github)
-
-	result := append(lst1, lst2...)
-	return append(result, lst3...)
-}
-
-func RecurringTaskToItems(tasks []Task) []list.Item {
+func TasksToItems(tasks []Task) []list.Item {
 	list := make([]list.Item, 0)
 	for i, v := range tasks {
 		v.Index = i
-		v.TaskType = enums.RecurringTask
-		list = append(list, v)
-	}
-	return list
-}
-
-func UniqueTaskToItems(tasks []Task) []list.Item {
-	list := make([]list.Item, 0)
-	for i, v := range tasks {
-		v.Index = i
-		v.TaskType = enums.UniqueTask
 		list = append(list, v)
 	}
 	return list
@@ -97,27 +81,21 @@ func GetItems() Tasks {
 
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		f, err2 := os.Create(path)
-		if err2 != nil {
-			fmt.Println(err2.Error())
+		tasks := Tasks{
+			All:    make([]Task, 0),
+			Github: make([]GithubTask, 0),
 		}
-
-		content, err2 := os.ReadFile(GetYesterdayPath())
-		if err2 != nil {
-			fmt.Println(err2.Error())
-		}
-
-		tasks := Tasks{}
-		json.Unmarshal(content, &tasks)
-
-		tasks.Unique = make([]Task, 0)
 
 		data, err2 := json.Marshal(tasks)
 		if err2 != nil {
 			fmt.Println(err2.Error())
+			return Tasks{}
 		}
 
-		f.Write(data)
+		err2 = os.WriteFile(path, data, 0o644)
+		if err2 != nil {
+			fmt.Println(err2.Error())
+		}
 	} else if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
@@ -149,8 +127,37 @@ func GetPath() string {
 	return filepath.Join(home, config.AppConfig.General.NotesDir, ".daily", date)
 }
 
-func GetYesterdayPath() string {
-	home, _ := os.UserHomeDir()
-	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
-	return filepath.Join(home, config.AppConfig.General.NotesDir, ".daily", yesterday)
+func ConvertGitHubIssuestoGithubTasks(issues []github.GitHubIssue) []GithubTask {
+	tasks := make([]GithubTask, len(issues))
+	for i, issue := range issues {
+		// Extract owner and repo from the repo field (format: "owner/repo")
+		repoParts := strings.Split(issue.Repo, "/")
+		owner := ""
+		repo := ""
+		if len(repoParts) == 2 {
+			owner = repoParts[0]
+			repo = repoParts[1]
+		}
+
+		tasks[i] = GithubTask{
+			TaskTitle: issue.IssueTitle,
+			TaskDesc:  issue.Body,
+			Status:    enums.Pending, // GitHub issues are typically "pending" in task context
+			Ref:       fmt.Sprintf("#%d", issue.Number),
+			Repo:      repo,
+			Owner:     owner,
+			Link:      issue.HTMLURL,
+			Labels:    convertLabelsToStrings(issue.Labels),
+			Assignee:  issue.Assignees,
+		}
+	}
+	return tasks
+}
+
+func convertLabelsToStrings(labels []github.Label) []string {
+	result := make([]string, len(labels))
+	for i, label := range labels {
+		result[i] = label.Name
+	}
+	return result
 }

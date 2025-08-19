@@ -53,7 +53,7 @@ func (d TaskDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 		}
 	} else if gt, ok := item.(GithubTask); ok {
 		// Handle GitHub Task with special styling
-		githubIcon := "🐙" // GitHub icon
+		githubIcon := "GH" // GitHub indicator
 		repoInfo := fmt.Sprintf("[%s/%s%s]", gt.Owner, gt.Repo, gt.Ref)
 
 		switch gt.Status {
