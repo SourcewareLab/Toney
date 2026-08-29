@@ -65,7 +65,7 @@ func Delete(path string, value string) error {
 		return nil
 	}
 
-	err := os.Remove(path)
+	err := os.RemoveAll(path)
 	if err != nil {
 		return err
 	}
